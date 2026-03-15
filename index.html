@@ -3,9 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>Secure Place Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d32f2f">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
 </head>
 <body>
-    <h1>Hello World</h1>
+    <div class="container">
+        <header>
+            <h1>Red Alert Safe Zone</h1>
+            <p>Find the nearest secure place immediately.</p>
+        </header>
+
+        <main>
+            <button id="guide-btn" class="primary-btn">
+                <span class="icon">🛡️</span>
+                Guide me to closest shelter
+            </button>
+
+            <div id="status-message" class="status"></div>
+
+            <div class="actions">
+                <button id="add-shelter-btn" class="secondary-btn">Add Current Location as Shelter</button>
+            </div>
+            
+            <div id="shelter-list" class="shelter-list">
+                <h3>Known Shelters</h3>
+                <ul id="shelters-ul"></ul>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
