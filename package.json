@@ -21,6 +21,8 @@
   "homepage": "https://github.com/OdedWeber480/myFirstProject#readme",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^8.2.0",
+    "dotenv": "^16.4.5"
   }
 }
