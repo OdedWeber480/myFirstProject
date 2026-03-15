@@ -11,15 +11,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusMessage = document.getElementById('status-message');
     const sheltersList = document.getElementById('shelters-ul');
 
-    // Load shelters from local storage or initialize with empty array
-    let shelters = JSON.parse(localStorage.getItem('securePlaces')) || [];
+    // API URL
+    const API_URL = '/api/shelters';
+    let shelters = [];
 
     // Render initial list
-    renderShelters();
+    fetchShelters();
 
     // Helper: Update status message
     function setStatus(msg) {
         statusMessage.textContent = msg;
+    }
+
+    // Helper: Fetch shelters from server
+    async function fetchShelters() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Failed to fetch data');
+            shelters = await response.json();
+            renderShelters();
+        } catch (error) {
+            console.error('Error fetching shelters:', error);
+            setStatus('Failed to load shelter list.');
+        }
     }
 
     // Helper: Get current location
@@ -90,26 +104,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = `Shelter ${shelters.length + 1} (${new Date().toLocaleTimeString()})`;
             
             const newShelter = {
-                id: Date.now(),
                 name: name,
                 lat: lat,
                 lng: lng
             };
 
-            shelters.push(newShelter);
-            saveShelters();
-            renderShelters();
-            setStatus('Shelter added successfully!');
+            // Send to server
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newShelter)
+            });
+
+            if (!response.ok) throw new Error('Server rejected data');
+
+            await fetchShelters(); // Refresh list from server
+            setStatus('Shelter added successfully to database!');
             
         } catch (error) {
             setStatus('Failed to add shelter: ' + error.message);
         }
     });
-
-    // Save to LocalStorage
-    function saveShelters() {
-        localStorage.setItem('securePlaces', JSON.stringify(shelters));
-    }
 
     // Render list
     function renderShelters() {
@@ -125,10 +142,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Make removeShelter globally available for the onclick handler
-    window.removeShelter = function(id) {
-        shelters = shelters.filter(s => s.id !== id);
-        saveShelters();
-        renderShelters();
+    window.removeShelter = async function(id) {
+        if (!confirm('Are you sure you want to delete this shelter?')) return;
+        
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                await fetchShelters();
+                setStatus('Shelter removed.');
+            } else {
+                setStatus('Failed to remove shelter.');
+            }
+        } catch (error) {
+            console.error(error);
+            setStatus('Error removing shelter.');
+        }
     };
 
     // Haversine formula to calculate distance in km
