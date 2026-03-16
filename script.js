@@ -7,9 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const guideBtn = document.getElementById('guide-btn');
-    const addShelterBtn = document.getElementById('add-shelter-btn');
+    const addShelterForm = document.getElementById('add-shelter-form');
+    const shelterTypeSelect = document.getElementById('shelter-type');
+    const floorsGroup = document.getElementById('floors-group');
+    const floorsInput = document.getElementById('floors');
     const statusMessage = document.getElementById('status-message');
-    const sheltersList = document.getElementById('shelters-ul');
+    const shelterCountSpan = document.getElementById('shelter-count');
 
     // API URL
     const API_URL = '/api/shelters';
@@ -29,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(API_URL);
             if (!response.ok) throw new Error('Failed to fetch data');
             shelters = await response.json();
-            renderShelters();
+            renderShelterStats();
         } catch (error) {
             console.error('Error fetching shelters:', error);
             setStatus('Failed to load shelter list.');
@@ -79,7 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (nearestShelter) {
-                setStatus(`Nearest shelter found: ${nearestShelter.name} (${Math.round(minDistance * 1000)}m)`);
+                let typeDisplay = nearestShelter.type.replace('_', ' ');
+                if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
+                    typeDisplay += ` (${nearestShelter.floors} floors down)`;
+                }
+                setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
                 // Open Google Maps
                 window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestShelter.lat},${nearestShelter.lng}&travelmode=walking`, '_blank');
             } else {
@@ -92,21 +99,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Feature 2: Add current location as shelter
-    addShelterBtn.addEventListener('click', async () => {
+    // Handle Shelter Type Change (Show/Hide Floors)
+    shelterTypeSelect.addEventListener('change', () => {
+        if (shelterTypeSelect.value === 'underground_parking') {
+            floorsGroup.style.display = 'block';
+            floorsInput.required = true;
+        } else {
+            floorsGroup.style.display = 'none';
+            floorsInput.required = false;
+            floorsInput.value = '';
+        }
+    });
+
+    // Feature 2: Add current location as shelter (Form Submission)
+    addShelterForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
         setStatus('Getting location to add...');
         try {
             const position = await getCurrentLocation();
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             
-            // Generate a simple name based on count or timestamp
-            const name = `Shelter ${shelters.length + 1} (${new Date().toLocaleTimeString()})`;
+            const type = shelterTypeSelect.value;
+            const floors = floorsInput.value ? parseInt(floorsInput.value) : null;
+            
+            const name = `Shelter (${new Date().toLocaleTimeString()})`;
             
             const newShelter = {
                 name: name,
                 lat: lat,
-                lng: lng
+                lng: lng,
+                type: type,
+                floors: floors
             };
 
             // Send to server
@@ -121,48 +146,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Server rejected data');
 
             await fetchShelters(); // Refresh list from server
-            setStatus('Shelter added successfully to database!');
+            setStatus('Shelter added successfully!');
+            addShelterForm.reset();
+            floorsGroup.style.display = 'none'; // Reset floor visibility
             
         } catch (error) {
             setStatus('Failed to add shelter: ' + error.message);
         }
     });
 
-    // Render list
-    function renderShelters() {
-        sheltersList.innerHTML = '';
-        shelters.forEach(shelter => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span>${shelter.name}</span>
-                <button class="delete-btn" onclick="removeShelter(${shelter.id})">&times;</button>
-            `;
-            sheltersList.appendChild(li);
-        });
+    // Render Stats (instead of list)
+    function renderShelterStats() {
+        if (shelterCountSpan) {
+            shelterCountSpan.textContent = shelters.length;
+        }
     }
 
-    // Make removeShelter globally available for the onclick handler
-    window.removeShelter = async function(id) {
-        if (!confirm('Are you sure you want to delete this shelter?')) return;
-        
-        try {
-            const response = await fetch(`${API_URL}/${id}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.ok) {
-                await fetchShelters();
-                setStatus('Shelter removed.');
-            } else {
-                setStatus('Failed to remove shelter.');
-            }
-        } catch (error) {
-            console.error(error);
-            setStatus('Error removing shelter.');
-        }
-    };
-
     // Haversine formula to calculate distance in km
+
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371; // Radius of the earth in km
         const dLat = deg2rad(lat2 - lat1);

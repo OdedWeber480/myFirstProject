@@ -79,40 +79,49 @@ h1 {
     cursor: pointer;
     margin-top: 20px;
     width: 100%;
-    max-width: 300px;
 }
 
 .secondary-btn:hover {
     background-color: #1565c0;
 }
 
-.shelter-list {
-    margin-top: 40px;
+.stats {
+    margin: 20px 0;
+    font-size: 1.1rem;
+    color: #444;
+}
+
+.add-shelter-section {
     width: 100%;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
 
-.shelter-list ul {
-    list-style-type: none;
-    padding: 0;
+.add-shelter-section h3 {
+    margin-top: 0;
+    color: #555;
+    text-align: center;
 }
 
-.shelter-list li {
-    background: #f9f9f9;
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+select, input {
+    width: 100%;
     padding: 10px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.delete-btn {
-    background: none;
-    border: none;
-    color: #999;
-    cursor: pointer;
-    font-size: 1.2rem;
-}
-
-.delete-btn:hover {
-    color: #d32f2f;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
 }

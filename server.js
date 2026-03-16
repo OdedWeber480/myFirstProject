@@ -25,6 +25,12 @@ if (!MONGODB_URI) {
 // Schema Definition
 const shelterSchema = new mongoose.Schema({
     name: { type: String, required: true },
+    type: { 
+        type: String, 
+        required: true,
+        enum: ['underground_parking', 'public_shelter', 'building_shelter'] 
+    },
+    floors: { type: Number }, // Only relevant for underground_parking
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
     createdAt: { type: Date, default: Date.now }
@@ -57,12 +63,12 @@ app.get('/api/shelters', async (req, res) => {
 // POST new shelter
 app.post('/api/shelters', async (req, res) => {
     try {
-        const { name, lat, lng } = req.body;
-        if (!name || !lat || !lng) {
+        const { name, lat, lng, type, floors } = req.body;
+        if (!name || !lat || !lng || !type) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const newShelter = new Shelter({ name, lat, lng });
+        const newShelter = new Shelter({ name, lat, lng, type, floors });
         const savedShelter = await newShelter.save();
         res.status(201).json(savedShelter);
     } catch (err) {

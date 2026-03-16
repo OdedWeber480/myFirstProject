@@ -24,13 +24,30 @@
 
             <div id="status-message" class="status"></div>
 
-            <div class="actions">
-                <button id="add-shelter-btn" class="secondary-btn">Add Current Location as Shelter</button>
+            <div class="stats">
+                <p><strong>Total Shelters in Database: <span id="shelter-count">0</span></strong></p>
             </div>
-            
-            <div id="shelter-list" class="shelter-list">
-                <h3>Known Shelters</h3>
-                <ul id="shelters-ul"></ul>
+
+            <div class="add-shelter-section">
+                <h3>Report a New Shelter</h3>
+                <form id="add-shelter-form">
+                    <div class="form-group">
+                        <label for="shelter-type">Shelter Type:</label>
+                        <select id="shelter-type" required>
+                            <option value="" disabled selected>Select type</option>
+                            <option value="public_shelter">Public Shelter</option>
+                            <option value="building_shelter">Building Shelter</option>
+                            <option value="underground_parking">Underground Parking Lot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="floors-group" style="display: none;">
+                        <label for="floors">Floors Underground:</label>
+                        <input type="number" id="floors" min="1" placeholder="e.g. 2">
+                    </div>
+
+                    <button type="submit" class="secondary-btn">Add Current Location</button>
+                </form>
             </div>
         </main>
     </div>
