@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (nearestShelter) {
-                let typeDisplay = nearestShelter.type.replace('_', ' ');
+                let typeDisplay = nearestShelter.type ? nearestShelter.type.replace('_', ' ') : 'Shelter';
                 if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
                     typeDisplay += ` (${nearestShelter.floors} floors down)`;
                 }
