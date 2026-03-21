@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=25')
+        navigator.serviceWorker.register('./sw.js?v=26')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
@@ -61,6 +61,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const editDescriptionInput = document.getElementById('edit-description');
     const editViewMapBtn = document.getElementById('edit-view-map-btn');
 
+    // Nearest Shelter Modal Elements
+    const nearestModal = document.getElementById('nearest-shelter-modal');
+    const closeNearestBtn = document.getElementById('close-nearest-btn');
+    const navigateBtn = document.getElementById('navigate-btn');
+    const nearestType = document.getElementById('nearest-type');
+    const nearestFloorsContainer = document.getElementById('nearest-floors-container');
+    const nearestFloors = document.getElementById('nearest-floors');
+    const nearestDistance = document.getElementById('nearest-distance');
+    const nearestDescription = document.getElementById('nearest-description');
+    let currentNearestShelter = null;
+
     // API URL & State
     const API_URL = '/api/shelters';
     let shelters = [];
@@ -118,7 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
             confirm_delete: "Are you sure you want to delete this shelter?",
             status_calc_error: "Could not calculate nearest shelter.",
             btn_edit: "Edit",
-            btn_delete: "Delete"
+            btn_delete: "Delete",
+            nearest_shelter_title: "Nearest Shelter Found",
+            distance_label: "Distance:",
+            navigate_btn: "Navigate Now"
         },
         he: {
             app_title: "אזור בטוח - צבע אדום",
@@ -163,7 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
             confirm_delete: "האם אתה בטוח שברצונך למחוק מקלט זה?",
             status_calc_error: "לא ניתן לחשב את המקלט הקרוב ביותר.",
             btn_edit: "ערוך",
-            btn_delete: "מחק"
+            btn_delete: "מחק",
+            nearest_shelter_title: "המקלט הקרוב ביותר נמצא",
+            distance_label: "מרחק:",
+            navigate_btn: "נווט עכשיו"
         }
     };
 
@@ -555,6 +572,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === adminPanelModal) adminPanelModal.style.display = 'none';
         if (e.target === editModal) editModal.style.display = 'none';
         if (e.target === mapModal) mapModal.style.display = 'none';
+        if (e.target === nearestModal) nearestModal.style.display = 'none';
+    });
+
+    closeNearestBtn.addEventListener('click', () => {
+        nearestModal.style.display = 'none';
+    });
+
+    navigateBtn.addEventListener('click', () => {
+        if (currentNearestShelter) {
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentNearestShelter.lat},${currentNearestShelter.lng}&travelmode=walking`, '_blank');
+        }
     });
 
     // Helper: Get current location
@@ -611,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nearestShelter = sheltersWithDistance[0];
 
             if (nearestShelter) {
+                currentNearestShelter = nearestShelter;
                 const minDistance = nearestShelter.distance;
 
                 // Translate type
@@ -621,16 +650,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 let typeDisplay = t[typeKey] || nearestShelter.type;
 
+                // Populate Modal
+                nearestType.textContent = typeDisplay;
+                
+                if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
+                     nearestFloorsContainer.style.display = 'block';
+                     nearestFloors.textContent = nearestShelter.floors;
+                } else {
+                     nearestFloorsContainer.style.display = 'none';
+                }
+
+                nearestDistance.textContent = `${Math.round(minDistance * 1000)}m`;
+                
+                if (nearestShelter.description) {
+                    nearestDescription.style.display = 'block';
+                    nearestDescription.textContent = nearestShelter.description;
+                } else {
+                     nearestDescription.style.display = 'none';
+                }
+
                 if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
                     typeDisplay += ` (${nearestShelter.floors} ${t.floors_down})`;
                 }
                 setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
                 
-                // Open Google Maps
-                // Use slightly delayed open to ensure UI updates first
-                setTimeout(() => {
-                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestShelter.lat},${nearestShelter.lng}&travelmode=walking`, '_blank');
-                }, 500);
+                // Show Modal instead of opening map directly
+                nearestModal.style.display = 'flex';
             } else {
                 setStatus(t.status_calc_error);
             }

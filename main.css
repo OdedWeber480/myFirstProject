@@ -281,6 +281,19 @@ textarea {
     color: #d32f2f;
 }
 
+.shelter-details {
+    margin: 20px 0;
+    text-align: left;
+}
+
+.shelter-details p {
+    margin: 8px 0;
+}
+
+[dir="rtl"] .shelter-details {
+    text-align: right;
+}
+
 /* Admin List Styles */
 .shelter-list {
     text-align: left;
