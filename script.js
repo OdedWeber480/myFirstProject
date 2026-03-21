@@ -36,12 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const editShelterType = document.getElementById('edit-shelter-type');
     const editFloorsGroup = document.getElementById('edit-floors-group');
     const editFloorsInput = document.getElementById('edit-floors');
+    const editViewMapBtn = document.getElementById('edit-view-map-btn');
 
     // API URL
     const API_URL = '/api/shelters';
     let shelters = [];
     let map = null;
     let userMarker = null;
+    let mapMarkers = [];
     let adminToken = sessionStorage.getItem('adminToken') || null;
 
     // Check if already logged in
@@ -186,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shelter = shelters.find(s => s.id === id);
         if (!shelter) return;
 
+        currentEditShelterId = id;
         editShelterId.value = shelter.id;
         editShelterType.value = shelter.type || 'public_shelter';
         
@@ -243,13 +246,104 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Show Map from Edit Modal
+    editViewMapBtn.addEventListener('click', () => {
+        const shelter = shelters.find(s => s.id === currentEditShelterId);
+        if (!shelter) return;
+
+        mapModal.style.display = 'flex';
+        initMap();
+        clearMapMarkers();
+        
+        addShelterMarkers([shelter]);
+        map.setView([shelter.lat, shelter.lng], 16); // Close zoom for specific shelter
+        
+        setTimeout(() => map.invalidateSize(), 100);
+    });
+
+    // --- Map Functions ---
+    function initMap() {
+        if (!map) {
+            map = L.map('map').setView([31.0461, 34.8516], 8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: ' OpenStreetMap contributors'
+            }).addTo(map);
+        }
+    }
+
+    function clearMapMarkers() {
+        if (mapMarkers.length > 0) {
+            mapMarkers.forEach(marker => map.removeLayer(marker));
+            mapMarkers = [];
+        }
+        if (userMarker && map) {
+            map.removeLayer(userMarker);
+            userMarker = null;
+        }
+    }
+
+    function addShelterMarkers(sheltersToShow) {
+        sheltersToShow.forEach(shelter => {
+            let typeDisplay = shelter.type ? shelter.type.replace('_', ' ') : 'Shelter';
+            if (shelter.type === 'underground_parking' && shelter.floors) {
+                typeDisplay += ` (${shelter.floors} floors down)`;
+            }
+            
+            const marker = L.marker([shelter.lat, shelter.lng])
+                .addTo(map)
+                .bindPopup(`<b>${shelter.name}</b><br>${typeDisplay}`);
+            
+            mapMarkers.push(marker);
+            
+            // If only showing one shelter, open its popup
+            if (sheltersToShow.length === 1) {
+                marker.openPopup();
+            }
+        });
+    }
+
+    // Feature: View Map (All Shelters)
+    viewMapBtn.addEventListener('click', async () => {
+        mapModal.style.display = 'flex';
+        initMap();
+        clearMapMarkers();
+
+        // Try to center on user
+        try {
+            const position = await getCurrentLocation();
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            userMarker = L.marker([userLat, userLng])
+                .addTo(map)
+                .bindPopup('<b>You are here</b>')
+                .openPopup();
+                
+            map.setView([userLat, userLng], 13);
+        } catch (e) {
+            console.log("Could not get user location for map center");
+        }
+
+        // Add all shelter markers
+        addShelterMarkers(shelters);
+        
+        // Fix for map rendering in modal (invalidate size after modal is visible)
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    });
+
+    closeMapBtn.addEventListener('click', () => {
+        mapModal.style.display = 'none';
+    });
+
     // Close modals on outside click
     window.addEventListener('click', (e) => {
         if (e.target === loginModal) loginModal.style.display = 'none';
         if (e.target === adminPanelModal) adminPanelModal.style.display = 'none';
         if (e.target === editModal) editModal.style.display = 'none';
+        if (e.target === mapModal) mapModal.style.display = 'none';
     });
-
 
     // Helper: Get current location
     function getCurrentLocation() {
@@ -308,67 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             setStatus('Error accessing location: ' + error.message);
-        }
-    });
-
-    // Feature: View Map
-    viewMapBtn.addEventListener('click', async () => {
-        mapModal.style.display = 'flex';
-        
-        // Initialize map if not already initialized
-        if (!map) {
-            // Default center (Israel) if location fails
-            map = L.map('map').setView([31.0461, 34.8516], 8);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-        }
-
-        // Try to center on user
-        try {
-            const position = await getCurrentLocation();
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
-            
-            if (userMarker) map.removeLayer(userMarker);
-            
-            userMarker = L.marker([userLat, userLng])
-                .addTo(map)
-                .bindPopup('<b>You are here</b>')
-                .openPopup();
-                
-            map.setView([userLat, userLng], 13);
-        } catch (e) {
-            console.log("Could not get user location for map center");
-        }
-
-        // Add shelter markers
-        shelters.forEach(shelter => {
-            let typeDisplay = shelter.type ? shelter.type.replace('_', ' ') : 'Shelter';
-            if (shelter.type === 'underground_parking' && shelter.floors) {
-                typeDisplay += ` (${shelter.floors} floors down)`;
-            }
-            
-            L.marker([shelter.lat, shelter.lng])
-                .addTo(map)
-                .bindPopup(`<b>${shelter.name}</b><br>${typeDisplay}`);
-        });
-        
-        // Fix for map rendering in modal (invalidate size after modal is visible)
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 100);
-    });
-
-    closeMapBtn.addEventListener('click', () => {
-        mapModal.style.display = 'none';
-    });
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-        if (e.target === mapModal) {
-            mapModal.style.display = 'none';
         }
     });
 
