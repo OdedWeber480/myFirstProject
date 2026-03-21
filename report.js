@@ -7,9 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusMessage = document.getElementById('status-message');
     const langToggleBtn = document.getElementById('lang-toggle');
     const cancelBtn = document.getElementById('cancel-btn');
+    const locationStatus = document.getElementById('location-status');
 
     // API URL
     const API_URL = '/api/shelters';
+    
+    // Map State
+    let map = null;
+    let marker = null;
+    let selectedLat = null;
+    let selectedLng = null;
 
     // --- Translations ---
     const translations = {
@@ -24,7 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
             floors_label: "Floors Underground:",
             description_label: "Description (Optional):",
             description_placeholder_long: "Describe the location, how to get there, etc.",
-            report_btn: "Report Current Location",
+            location_label: "Location:",
+            drag_marker_hint: "Drag the marker to adjust the exact location.",
+            report_btn: "Report Selected Location",
             cancel_btn: "Cancel",
             status_getting_loc: "Getting location...",
             status_added: "Shelter added successfully! Redirecting...",
@@ -42,7 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
             floors_label: "קומות מתחת לקרקע:",
             description_label: "תיאור (אופציונלי):",
             description_placeholder_long: "תאר את המיקום, איך להגיע וכו'",
-            report_btn: "דווח על המיקום הנוכחי",
+            location_label: "מיקום:",
+            drag_marker_hint: "גרור את הסמן כדי לדייק את המיקום.",
+            report_btn: "דווח על המיקום הנבחר",
             cancel_btn: "ביטול",
             status_getting_loc: "מקבל מיקום...",
             status_added: "המקלט נוסף בהצלחה! מעביר...",
@@ -81,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setLanguage(currentLang);
 
+    // Initialize Map
+    initMap();
+
     langToggleBtn.addEventListener('click', () => {
         const newLang = currentLang === 'en' ? 'he' : 'en';
         setLanguage(newLang);
@@ -89,6 +103,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper: Update status message
     function setStatus(msg) {
         statusMessage.textContent = msg;
+    }
+
+    // Initialize Map
+    async function initMap() {
+        // Default center (Israel)
+        const defaultLat = 31.0461;
+        const defaultLng = 34.8516;
+        
+        map = L.map('report-map').setView([defaultLat, defaultLng], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        locationStatus.textContent = t.status_getting_loc;
+
+        try {
+            const position = await getCurrentLocation();
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            updateMarker(lat, lng);
+            map.setView([lat, lng], 16);
+            locationStatus.textContent = t.drag_marker_hint;
+        } catch (error) {
+            console.error("Location error:", error);
+            locationStatus.textContent = t.status_error_loc + error.message;
+            // Fallback to center of map if location fails, let user choose
+            updateMarker(defaultLat, defaultLng);
+        }
+
+        // Map Click Event
+        map.on('click', (e) => {
+            updateMarker(e.latlng.lat, e.latlng.lng);
+        });
+    }
+
+    function updateMarker(lat, lng) {
+        selectedLat = lat;
+        selectedLng = lng;
+
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+            
+            marker.on('dragend', (e) => {
+                const position = marker.getLatLng();
+                selectedLat = position.lat;
+                selectedLng = position.lng;
+            });
+        }
     }
 
     // Helper: Get current location
@@ -127,11 +192,15 @@ document.addEventListener('DOMContentLoaded', () => {
     addShelterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        setStatus(t.status_getting_loc);
+        if (!selectedLat || !selectedLng) {
+            setStatus(t.status_error_loc + "No location selected");
+            return;
+        }
+
+        setStatus("Submitting...");
         try {
-            const position = await getCurrentLocation();
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
+            const lat = selectedLat;
+            const lng = selectedLng;
             
             const type = shelterTypeSelect.value;
             const floors = floorsInput.value ? parseInt(floorsInput.value) : null;

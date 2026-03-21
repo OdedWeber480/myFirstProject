@@ -4,9 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Shelter - Secure Place Finder</title>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.css?v=27">
     <meta name="theme-color" content="#d32f2f">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        #report-map {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -24,6 +37,12 @@
 
             <div class="add-shelter-section" style="border-top: none; margin-top: 0;">
                 <form id="add-shelter-form">
+                    <div class="form-group">
+                        <label data-i18n="location_label">Location:</label>
+                        <div id="report-map"></div>
+                        <p id="location-status" style="font-size: 0.9rem; color: #666; margin-top: -15px; margin-bottom: 15px;"></p>
+                    </div>
+
                     <div class="form-group">
                         <label for="shelter-type" data-i18n="shelter_type_label">Shelter Type:</label>
                         <select id="shelter-type" required>
@@ -45,7 +64,7 @@
                     </div>
                     
                     <button type="submit" class="secondary-btn" style="background-color: #d32f2f; margin-top: 20px;">
-                        📍 <span data-i18n="report_btn">Report Current Location</span>
+                        📍 <span data-i18n="report_btn">Report Selected Location</span>
                     </button>
                     
                     <button type="button" id="cancel-btn" class="secondary-btn" style="background-color: #757575; margin-top: 10px;">
@@ -55,6 +74,6 @@
             </div>
         </main>
     </div>
-    <script src="report.js"></script>
+    <script src="report.js?v=27"></script>
 </body>
 </html>
