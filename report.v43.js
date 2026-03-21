@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- AUTH CHECK ---
+    const adminToken = sessionStorage.getItem('adminToken');
+    if (!adminToken) {
+        alert("Access Denied: Admins only.");
+        window.location.href = 'index.html';
+        return;
+    }
+    // ------------------
+
     // --- CACHE BUSTING FOR MISSING OPTIONS ---
     // If the new 'portable_shelter' option is missing, it means we have stale HTML.
     // Force a hard reload/cache clear.
@@ -19,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------
 
     // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
-    console.log('Running Report Page Version 41.0');
+    console.log('Running Report Page Version 43.0');
     setTimeout(() => {
         const portableOption = document.getElementById('option-portable');
         let lang = localStorage.getItem('appLang');
@@ -310,12 +319,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'x-admin-token': adminToken
                 },
                 body: JSON.stringify(newShelter)
             });
 
-            if (!response.ok) throw new Error('Server rejected data');
+            if (!response.ok) {
+                if (response.status === 401) throw new Error('Unauthorized or Session Expired');
+                throw new Error('Server rejected data');
+            }
 
             setStatus(t.status_added);
             
