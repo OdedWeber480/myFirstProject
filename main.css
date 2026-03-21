@@ -9,6 +9,11 @@ body {
     min-height: 100vh;
 }
 
+/* Failsafe: Hide legacy elements if cached HTML is used */
+[data-i18n="report_new_shelter"] {
+    display: none !important;
+}
+
 .container {
     width: 100%;
     max-width: 600px;

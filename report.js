@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Translations ---
     const translations = {
         en: {
-            report_new_shelter: "Report a New Shelter",
+            report_page_title: "Report a New Shelter",
             report_subtitle: "Help others by adding a safe zone location.",
             shelter_type_label: "Shelter Type:",
             type_public: "Public Shelter",
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             status_error_loc: "Error accessing location: "
         },
         he: {
-            report_new_shelter: "דווח על מקלט חדש",
+            report_page_title: "דווח על מקלט חדש",
             report_subtitle: "עזור לאחרים על ידי הוספת מיקום מרחב מוגן.",
             shelter_type_label: "סוג מקלט:",
             type_public: "מקלט ציבורי",

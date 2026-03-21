@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=24')
+        navigator.serviceWorker.register('./sw.js?v=25')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
@@ -19,6 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(err => console.error('Service Worker Failed', err));
     }
+
+    // --- AGGRESSIVE CLEANUP FOR STALE CACHE ---
+    // If the user has old HTML cached, remove the unwanted heading manually
+    const legacyHeading = document.querySelector('[data-i18n="report_new_shelter"]');
+    if (legacyHeading) {
+        console.log('Detected stale HTML: Removing legacy heading');
+        legacyHeading.style.display = 'none';
+        legacyHeading.remove();
+    }
+    // ------------------------------------------
 
     const guideBtn = document.getElementById('guide-btn');
     const viewMapBtn = document.getElementById('view-map-btn');
@@ -88,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
             update_shelter_btn: "Update Shelter",
             total_shelters: "Total Shelters in Database:",
             nav_report_btn: "Report a new Shelter",
-            report_new_shelter: "Report a New Shelter",
-            report_btn: "Report Current Location",
+            report_new_shelter: "",
+            report_btn: "Report a new Shelter",
             status_locating: "Locating you...",
             status_finding: "Finding nearest shelter...",
             status_no_shelters: "No shelters found. Please add a shelter location first.",
