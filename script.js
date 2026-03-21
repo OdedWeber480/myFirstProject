@@ -290,14 +290,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             item.innerHTML = `
-                <div class="shelter-info">${t.btn_e}
-                    <strong>${shelter.name}</strong><br>${t.btn_d}
+                <div class="shelter-info">
+                    <strong>${shelter.name}</strong><br>
                     ${t.shelter_type_label} ${typeDisplay}<br>
                     <small>ID: ${shelter.id}</small>
                 </div>
                 <div class="admin-actions">
-                    <button class="edit-btn" data-id="${shelter.id}">Edit</button>
-                    <button class="delete-btn" data-id="${shelter.id}">Delete</button>
+                    <button class="edit-btn" data-id="${shelter.id}">${t.btn_edit}</button>
+                    <button class="delete-btn" data-id="${shelter.id}">${t.btn_delete}</button>
                 </div>
             `;
             adminShelterList.appendChild(item);
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let typeDisplay = t[typeKey] || nearestShelter.type;
 
                 if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
-                    typeDi`.status_(${n_hrlo}{t.floors_down})`;
+                    typeDisplay += ` (${nearestShelter.floors} ${t.floors_down})`;
                 }
                 setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
                 // Open Google Maps
