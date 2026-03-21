@@ -1,11 +1,11 @@
-const CACHE_NAME = 'secure-place-v41';
+const CACHE_NAME = 'secure-place-v42';
 const ASSETS = [
   './',
   './index.html',
   './report.html',
-  './main.css?v=41',
-  './app.v41.js',
-  './report.v41.js',
+  './main.css?v=42',
+  './app.v42.js',
+  './report.v42.js',
   './manifest.json',
   './icon.svg'
 ];

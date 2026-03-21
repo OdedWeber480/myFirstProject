@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
     setTimeout(() => {
-        console.log('Running App Version 41.0'); 
+        console.log('Running App Version 42.0'); 
         const editPortableOption = document.getElementById('edit-option-portable');
         let lang = localStorage.getItem('appLang');
         if (!lang) lang = 'he'; // Default to Hebrew if not set
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=41')
+        navigator.serviceWorker.register('./sw.js?v=42')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
@@ -291,17 +291,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Helper: Update shelter stats
     function renderShelterStats() {
+        console.log('Rendering Stats. Shelters count:', shelters ? shelters.length : 'null');
         if (shelterCountSpan) {
-            shelterCountSpan.textContent = shelters.length;
+            if (Array.isArray(shelters)) {
+                shelterCountSpan.textContent = shelters.length;
+            } else {
+                console.error('Shelters is not an array:', shelters);
+            }
+        } else {
+            console.error('shelterCountSpan element not found');
         }
     }
 
     // Helper: Fetch shelters from server
     async function fetchShelters() {
+        console.log('Fetching shelters...');
         try {
             const response = await fetch(API_URL);
             if (!response.ok) throw new Error('Failed to fetch data');
             shelters = await response.json();
+            console.log('Shelters fetched successfully:', shelters.length);
+            setStatus(''); // Clear any previous error messages
             renderShelterStats();
         } catch (error) {
             console.error('Error fetching shelters:', error);
