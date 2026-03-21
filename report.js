@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const langToggleBtn = document.getElementById('lang-toggle');
     const cancelBtn = document.getElementById('cancel-btn');
     const locationStatus = document.getElementById('location-status');
+    const mapGroup = document.getElementById('map-group');
+    const locationMethodRadios = document.getElementsByName('location-method');
+    const reportBtnSpan = document.querySelector('[data-i18n="report_btn"]');
 
     // API URL
     const API_URL = '/api/shelters';
@@ -32,8 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
             description_label: "Description (Optional):",
             description_placeholder_long: "Describe the location, how to get there, etc.",
             location_label: "Location:",
+            location_method_label: "Location Method:",
+            method_current: "Current Location",
+            method_manual: "Select on Map",
             drag_marker_hint: "Drag the marker to adjust the exact location.",
-            report_btn: "Report Selected Location",
+            report_btn: "Report Current Location",
+            report_btn_manual: "Report Selected Location",
             cancel_btn: "Cancel",
             status_getting_loc: "Getting location...",
             status_added: "Shelter added successfully! Redirecting...",
@@ -52,8 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
             description_label: "תיאור (אופציונלי):",
             description_placeholder_long: "תאר את המיקום, איך להגיע וכו'",
             location_label: "מיקום:",
+            location_method_label: "שיטת מיקום:",
+            method_current: "מיקום נוכחי",
+            method_manual: "בחר על המפה",
             drag_marker_hint: "גרור את הסמן כדי לדייק את המיקום.",
-            report_btn: "דווח על המיקום הנבחר",
+            report_btn: "דווח על המיקום הנוכחי",
+            report_btn_manual: "דווח על המיקום הנבחר",
             cancel_btn: "ביטול",
             status_getting_loc: "מקבל מיקום...",
             status_added: "המקלט נוסף בהצלחה! מעביר...",
@@ -92,8 +103,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setLanguage(currentLang);
 
-    // Initialize Map
+    // Initialize Map (Hidden by default)
     initMap();
+
+    // Handle Location Method Change
+    locationMethodRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'manual') {
+                mapGroup.style.display = 'block';
+                if (map) {
+                    setTimeout(() => map.invalidateSize(), 100);
+                }
+                reportBtnSpan.setAttribute('data-i18n', 'report_btn_manual');
+                reportBtnSpan.textContent = t.report_btn_manual;
+            } else {
+                mapGroup.style.display = 'none';
+                reportBtnSpan.setAttribute('data-i18n', 'report_btn');
+                reportBtnSpan.textContent = t.report_btn;
+            }
+        });
+    });
 
     langToggleBtn.addEventListener('click', () => {
         const newLang = currentLang === 'en' ? 'he' : 'en';
@@ -192,16 +221,28 @@ document.addEventListener('DOMContentLoaded', () => {
     addShelterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        if (!selectedLat || !selectedLng) {
-            setStatus(t.status_error_loc + "No location selected");
-            return;
-        }
-
-        setStatus("Submitting...");
+        setStatus(t.status_getting_loc);
+        
         try {
-            const lat = selectedLat;
-            const lng = selectedLng;
-            
+            let lat, lng;
+            const locationMethod = document.querySelector('input[name="location-method"]:checked').value;
+
+            if (locationMethod === 'manual') {
+                if (!selectedLat || !selectedLng) {
+                    setStatus(t.status_error_loc + "No location selected");
+                    return;
+                }
+                lat = selectedLat;
+                lng = selectedLng;
+            } else {
+                // Get Current Location
+                const position = await getCurrentLocation();
+                lat = position.coords.latitude;
+                lng = position.coords.longitude;
+            }
+
+            setStatus("Submitting...");
+
             const type = shelterTypeSelect.value;
             const floors = floorsInput.value ? parseInt(floorsInput.value) : null;
             const description = shelterDescriptionInput.value;

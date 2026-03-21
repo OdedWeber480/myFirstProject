@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Shelter - Secure Place Finder</title>
-    <link rel="stylesheet" href="main.css?v=27">
+    <link rel="stylesheet" href="main.css?v=28">
     <meta name="theme-color" content="#d32f2f">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <!-- Leaflet CSS -->
@@ -38,6 +38,20 @@
             <div class="add-shelter-section" style="border-top: none; margin-top: 0;">
                 <form id="add-shelter-form">
                     <div class="form-group">
+                        <label data-i18n="location_method_label">Location Method:</label>
+                        <div style="margin-top: 5px; margin-bottom: 15px;">
+                            <label style="display: inline-flex; align-items: center; margin-right: 15px; cursor: pointer;">
+                                <input type="radio" name="location-method" value="current" checked style="width: auto; margin-right: 5px;">
+                                <span data-i18n="method_current">Current Location</span>
+                            </label>
+                            <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                                <input type="radio" name="location-method" value="manual" style="width: auto; margin-right: 5px;">
+                                <span data-i18n="method_manual">Select on Map</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="map-group" style="display: none;">
                         <label data-i18n="location_label">Location:</label>
                         <div id="report-map"></div>
                         <p id="location-status" style="font-size: 0.9rem; color: #666; margin-top: -15px; margin-bottom: 15px;"></p>
@@ -64,7 +78,7 @@
                     </div>
                     
                     <button type="submit" class="secondary-btn" style="background-color: #d32f2f; margin-top: 20px;">
-                        📍 <span data-i18n="report_btn">Report Selected Location</span>
+                        📍 <span data-i18n="report_btn">Report Current Location</span>
                     </button>
                     
                     <button type="button" id="cancel-btn" class="secondary-btn" style="background-color: #757575; margin-top: 10px;">
@@ -74,6 +88,6 @@
             </div>
         </main>
     </div>
-    <script src="report.js?v=27"></script>
+    <script src="report.js?v=28"></script>
 </body>
 </html>
