@@ -528,32 +528,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Feature 1: Guide to nearest shelter
     guideBtn.addEventListener('click', async () => {
-        if (shelters.length === 0) {
-            setStatus(t.status_no_shelters);
-            return;
-        }
-
         setStatus(t.status_locating);
 
         try {
+            // 1. Get User Location
             const position = await getCurrentLocation();
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
+            
+            console.log(`User Location: ${userLat}, ${userLng} (Accuracy: ${position.coords.accuracy}m)`);
+
+            // 2. Refresh Shelter Data to ensure we have the latest list
+            setStatus("Updating data...");
+            await fetchShelters();
+
+            if (shelters.length === 0) {
+                setStatus(t.status_no_shelters);
+                return;
+            }
 
             setStatus(t.status_finding);
 
-            let minDistance = Infinity;
-            let nearestShelter = null;
+            // 3. Calculate all distances and sort
+            const sheltersWithDistance = shelters.map(shelter => {
+                if (!shelter.lat || !shelter.lng) return null;
+                const d = calculateDistance(userLat, userLng, parseFloat(shelter.lat), parseFloat(shelter.lng));
+                return { ...shelter, distance: d };
+            }).filter(s => s !== null);
 
-            shelters.forEach(shelter => {
-                const distance = calculateDistance(userLat, userLng, shelter.lat, shelter.lng);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearestShelter = shelter;
-                }
-            });
+            // Sort by distance (ascending)
+            sheltersWithDistance.sort((a, b) => a.distance - b.distance);
+
+            // Debug: Log top 3
+            console.log("Closest Shelters:", sheltersWithDistance.slice(0, 3));
+
+            const nearestShelter = sheltersWithDistance[0];
 
             if (nearestShelter) {
+                const minDistance = nearestShelter.distance;
+
                 // Translate type
                 let typeKey = '';
                 if (nearestShelter.type === 'public_shelter') typeKey = 'type_public';
@@ -566,8 +579,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     typeDisplay += ` (${nearestShelter.floors} ${t.floors_down})`;
                 }
                 setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
+                
                 // Open Google Maps
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestShelter.lat},${nearestShelter.lng}&travelmode=walking`, '_blank');
+                // Use slightly delayed open to ensure UI updates first
+                setTimeout(() => {
+                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestShelter.lat},${nearestShelter.lng}&travelmode=walking`, '_blank');
+                }, 500);
             } else {
                 setStatus(t.status_calc_error);
             }
