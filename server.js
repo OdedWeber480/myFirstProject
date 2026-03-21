@@ -22,6 +22,9 @@ if (!MONGODB_URI) {
         .catch(err => console.error('Could not connect to MongoDB:', err));
 }
 
+// Admin Password (Hardcoded as per request, but ideally should be in env)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'SecureplacefinderMashoo1500!';
+
 // Schema Definition
 const shelterSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -76,8 +79,46 @@ app.post('/api/shelters', async (req, res) => {
     }
 });
 
-// DELETE shelter
+// UPDATE shelter (Admin only)
+app.put('/api/shelters/:id', async (req, res) => {
+    const adminAuth = req.headers['x-admin-auth'];
+    if (adminAuth !== ADMIN_PASSWORD) {
+        return res.status(403).json({ error: 'Unauthorized: Invalid Admin Password' });
+    }
+
+    try {
+        const { type, floors } = req.body;
+        const updateData = { type };
+        
+        // Handle floors update logic
+        if (type === 'underground_parking') {
+            updateData.floors = floors;
+        } else {
+            updateData.floors = undefined; // Unset floors if not parking
+        }
+
+        const updatedShelter = await Shelter.findByIdAndUpdate(
+            req.params.id, 
+            updateData, 
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedShelter) {
+            return res.status(404).json({ error: 'Shelter not found' });
+        }
+        res.json(updatedShelter);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update shelter' });
+    }
+});
+
+// DELETE shelter (Admin only)
 app.delete('/api/shelters/:id', async (req, res) => {
+    const adminAuth = req.headers['x-admin-auth'];
+    if (adminAuth !== ADMIN_PASSWORD) {
+        return res.status(403).json({ error: 'Unauthorized: Invalid Admin Password' });
+    }
+
     try {
         const result = await Shelter.findByIdAndDelete(req.params.id);
         if (!result) {

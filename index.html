@@ -18,6 +18,7 @@
         <header>
             <h1>Red Alert Safe Zone</h1>
             <p>Find the nearest secure place immediately.</p>
+            <button id="admin-login-btn" class="text-btn">Admin Login</button>
         </header>
 
         <main>
@@ -30,6 +31,10 @@
                     <span class="icon">🗺️</span>
                     View All Shelters on Map
                 </button>
+                <button id="admin-panel-btn" class="secondary-btn" style="margin-top: 10px; display: none; background-color: #333;">
+                    <span class="icon">⚙️</span>
+                    Manage Shelters (Admin)
+                </button>
             </div>
 
             <div id="status-message" class="status"></div>
@@ -39,6 +44,47 @@
                 <div class="map-content">
                     <button id="close-map-btn" class="close-btn">&times;</button>
                     <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- Admin Login Modal -->
+            <div id="login-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span id="close-login-btn" class="close-modal">&times;</span>
+                    <h3>Admin Login</h3>
+                    <input type="password" id="admin-password" placeholder="Enter Password">
+                    <button id="submit-login-btn" class="primary-btn" style="margin-top: 10px;">Login</button>
+                </div>
+            </div>
+
+            <!-- Admin Panel Modal -->
+            <div id="admin-panel-modal" class="modal" style="display: none;">
+                <div class="modal-content full-height">
+                    <span id="close-admin-panel-btn" class="close-modal">&times;</span>
+                    <h3>Manage Shelters</h3>
+                    <div id="admin-shelter-list" class="shelter-list"></div>
+                </div>
+            </div>
+
+            <!-- Edit Shelter Modal -->
+            <div id="edit-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span id="close-edit-btn" class="close-modal">&times;</span>
+                    <h3>Edit Shelter</h3>
+                    <input type="hidden" id="edit-shelter-id">
+                    <div class="form-group">
+                        <label for="edit-shelter-type">Shelter Type:</label>
+                        <select id="edit-shelter-type">
+                            <option value="public_shelter">Public Shelter</option>
+                            <option value="building_shelter">Building Shelter</option>
+                            <option value="underground_parking">Underground Parking Lot</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="edit-floors-group" style="display: none;">
+                        <label for="edit-floors">Floors Underground:</label>
+                        <input type="number" id="edit-floors" min="1">
+                    </div>
+                    <button id="save-edit-btn" class="primary-btn">Update Shelter</button>
                 </div>
             </div>
 

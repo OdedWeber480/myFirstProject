@@ -17,11 +17,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusMessage = document.getElementById('status-message');
     const shelterCountSpan = document.getElementById('shelter-count');
 
+    // Admin Elements
+    const adminLoginBtn = document.getElementById('admin-login-btn');
+    const adminPanelBtn = document.getElementById('admin-panel-btn');
+    const loginModal = document.getElementById('login-modal');
+    const closeLoginBtn = document.getElementById('close-login-btn');
+    const submitLoginBtn = document.getElementById('submit-login-btn');
+    const adminPasswordInput = document.getElementById('admin-password');
+    const adminPanelModal = document.getElementById('admin-panel-modal');
+    const closeAdminPanelBtn = document.getElementById('close-admin-panel-btn');
+    const adminShelterList = document.getElementById('admin-shelter-list');
+    
+    // Edit Elements
+    const editModal = document.getElementById('edit-modal');
+    const closeEditBtn = document.getElementById('close-edit-btn');
+    const saveEditBtn = document.getElementById('save-edit-btn');
+    const editShelterId = document.getElementById('edit-shelter-id');
+    const editShelterType = document.getElementById('edit-shelter-type');
+    const editFloorsGroup = document.getElementById('edit-floors-group');
+    const editFloorsInput = document.getElementById('edit-floors');
+
     // API URL
     const API_URL = '/api/shelters';
     let shelters = [];
     let map = null;
     let userMarker = null;
+    let adminToken = sessionStorage.getItem('adminToken') || null;
+
+    // Check if already logged in
+    if (adminToken) {
+        adminPanelBtn.style.display = 'block';
+        adminLoginBtn.textContent = 'Logout';
+    }
 
     // Render initial list
     fetchShelters();
@@ -43,6 +70,186 @@ document.addEventListener('DOMContentLoaded', () => {
             setStatus('Failed to load shelter list.');
         }
     }
+
+    // --- Admin Functions ---
+
+    // Toggle Login Modal
+    adminLoginBtn.addEventListener('click', () => {
+        if (adminToken) {
+            // Logout
+            adminToken = null;
+            sessionStorage.removeItem('adminToken');
+            adminPanelBtn.style.display = 'none';
+            adminLoginBtn.textContent = 'Admin Login';
+            setStatus('Logged out.');
+        } else {
+            loginModal.style.display = 'flex';
+        }
+    });
+
+    closeLoginBtn.addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+
+    submitLoginBtn.addEventListener('click', () => {
+        const password = adminPasswordInput.value;
+        if (password) {
+            // We store the password as the token for simplicity as requested
+            adminToken = password; 
+            sessionStorage.setItem('adminToken', password);
+            adminPanelBtn.style.display = 'block';
+            adminLoginBtn.textContent = 'Logout';
+            loginModal.style.display = 'none';
+            adminPasswordInput.value = '';
+            setStatus('Logged in as Admin.');
+        }
+    });
+
+    // Open Admin Panel
+    adminPanelBtn.addEventListener('click', () => {
+        adminPanelModal.style.display = 'flex';
+        renderAdminList();
+    });
+
+    closeAdminPanelBtn.addEventListener('click', () => {
+        adminPanelModal.style.display = 'none';
+    });
+
+    // Render Admin List
+    function renderAdminList() {
+        adminShelterList.innerHTML = '';
+        if (shelters.length === 0) {
+            adminShelterList.innerHTML = '<p>No shelters found.</p>';
+            return;
+        }
+
+        shelters.forEach(shelter => {
+            const item = document.createElement('div');
+            item.className = 'shelter-item';
+            
+            let typeDisplay = shelter.type ? shelter.type.replace('_', ' ') : 'Shelter';
+            if (shelter.type === 'underground_parking' && shelter.floors) {
+                typeDisplay += ` (${shelter.floors} floors)`;
+            }
+
+            item.innerHTML = `
+                <div class="shelter-info">
+                    <strong>${shelter.name}</strong><br>
+                    Type: ${typeDisplay}<br>
+                    <small>ID: ${shelter.id}</small>
+                </div>
+                <div class="admin-actions">
+                    <button class="edit-btn" data-id="${shelter.id}">Edit</button>
+                    <button class="delete-btn" data-id="${shelter.id}">Delete</button>
+                </div>
+            `;
+            adminShelterList.appendChild(item);
+        });
+
+        // Attach event listeners
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => openEditModal(e.target.dataset.id));
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => deleteShelter(e.target.dataset.id));
+        });
+    }
+
+    // Delete Shelter
+    async function deleteShelter(id) {
+        if (!confirm('Are you sure you want to delete this shelter?')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-admin-auth': adminToken
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) throw new Error('Invalid Password');
+                throw new Error('Failed to delete');
+            }
+
+            await fetchShelters(); // Refresh data
+            renderAdminList(); // Refresh admin view
+            setStatus('Shelter deleted.');
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    // Open Edit Modal
+    function openEditModal(id) {
+        const shelter = shelters.find(s => s.id === id);
+        if (!shelter) return;
+
+        editShelterId.value = shelter.id;
+        editShelterType.value = shelter.type || 'public_shelter';
+        
+        if (shelter.type === 'underground_parking') {
+            editFloorsGroup.style.display = 'block';
+            editFloorsInput.value = shelter.floors || '';
+        } else {
+            editFloorsGroup.style.display = 'none';
+        }
+
+        editModal.style.display = 'flex';
+    }
+
+    closeEditBtn.addEventListener('click', () => {
+        editModal.style.display = 'none';
+    });
+
+    // Handle Edit Type Change
+    editShelterType.addEventListener('change', () => {
+        if (editShelterType.value === 'underground_parking') {
+            editFloorsGroup.style.display = 'block';
+        } else {
+            editFloorsGroup.style.display = 'none';
+            editFloorsInput.value = '';
+        }
+    });
+
+    // Save Edit
+    saveEditBtn.addEventListener('click', async () => {
+        const id = editShelterId.value;
+        const type = editShelterType.value;
+        const floors = editFloorsInput.value ? parseInt(editFloorsInput.value) : null;
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-auth': adminToken
+                },
+                body: JSON.stringify({ type, floors })
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) throw new Error('Invalid Password');
+                throw new Error('Failed to update');
+            }
+
+            await fetchShelters(); // Refresh data
+            renderAdminList(); // Refresh admin view
+            editModal.style.display = 'none';
+            setStatus('Shelter updated.');
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    // Close modals on outside click
+    window.addEventListener('click', (e) => {
+        if (e.target === loginModal) loginModal.style.display = 'none';
+        if (e.target === adminPanelModal) adminPanelModal.style.display = 'none';
+        if (e.target === editModal) editModal.style.display = 'none';
+    });
+
 
     // Helper: Get current location
     function getCurrentLocation() {
