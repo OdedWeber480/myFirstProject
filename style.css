@@ -22,12 +22,52 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 h1 {
     color: #d32f2f;
-    margin-bottom: 10px;
+    margin: 0 0 10px 0;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+    text-align: right;
+}
+
+[dir="rtl"] .header-top {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .shelter-info, [dir="rtl"] .form-group {
+    text-align: right;
+}
+
+[dir="rtl"] input, [dir="rtl"] select, [dir="rtl"] textarea {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .add-shelter-section h3 {
+    text-align: right;
+}
+
+[dir="rtl"] .stats {
+    text-align: center;
 }
 
 .primary-btn {

@@ -16,24 +16,27 @@
 <body>
     <div class="container">
         <header>
-            <h1>Red Alert Safe Zone</h1>
-            <p>Find the nearest secure place immediately.</p>
-            <button id="admin-login-btn" class="text-btn">Admin Login</button>
+            <div class="header-top">
+                <button id="lang-toggle" class="icon-btn">🇺🇸 / 🇮🇱</button>
+                <button id="admin-login-btn" class="text-btn" data-i18n="admin_login">Admin Login</button>
+            </div>
+            <h1 data-i18n="app_title">Red Alert Safe Zone</h1>
+            <p data-i18n="app_subtitle">Find the nearest secure place immediately.</p>
         </header>
 
         <main>
             <div class="action-buttons">
                 <button id="guide-btn" class="primary-btn">
                     <span class="icon">🛡️</span>
-                    Guide me to closest shelter
+                    <span data-i18n="guide_btn">Guide me to closest shelter</span>
                 </button>
                 <button id="view-map-btn" class="secondary-btn" style="margin-top: 10px;">
                     <span class="icon">🗺️</span>
-                    View All Shelters on Map
+                    <span data-i18n="view_map_btn">View All Shelters on Map</span>
                 </button>
                 <button id="admin-panel-btn" class="secondary-btn" style="margin-top: 10px; display: none; background-color: #333;">
                     <span class="icon">⚙️</span>
-                    Manage Shelters (Admin)
+                    <span data-i18n="manage_shelters_btn">Manage Shelters (Admin)</span>
                 </button>
             </div>
 
@@ -51,9 +54,9 @@
             <div id="login-modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <span id="close-login-btn" class="close-modal">&times;</span>
-                    <h3>Admin Login</h3>
-                    <input type="password" id="admin-password" placeholder="Enter Password">
-                    <button id="submit-login-btn" class="primary-btn" style="margin-top: 10px;">Login</button>
+                    <h3 data-i18n="admin_login_title">Admin Login</h3>
+                    <input type="password" id="admin-password" placeholder="Enter Password" data-i18n-placeholder="password_placeholder">
+                    <button id="submit-login-btn" class="primary-btn" style="margin-top: 10px;" data-i18n="login_btn">Login</button>
                 </div>
             </div>
 
@@ -61,7 +64,7 @@
             <div id="admin-panel-modal" class="modal" style="display: none;">
                 <div class="modal-content full-height">
                     <span id="close-admin-panel-btn" class="close-modal">&times;</span>
-                    <h3>Manage Shelters</h3>
+                    <h3 data-i18n="manage_shelters_title">Manage Shelters</h3>
                     <div id="admin-shelter-list" class="shelter-list"></div>
                 </div>
             </div>
@@ -70,63 +73,63 @@
             <div id="edit-modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <span id="close-edit-btn" class="close-modal">&times;</span>
-                    <h3>Edit Shelter</h3>
-                    <button id="edit-view-map-btn" class="secondary-btn" style="margin-bottom: 15px; background-color: #4CAF50;">View Location on Map</button>
+                    <h3 data-i18n="edit_shelter_title">Edit Shelter</h3>
+                    <button id="edit-view-map-btn" class="secondary-btn" style="margin-bottom: 15px; background-color: #4CAF50;" data-i18n="view_location_map">View Location on Map</button>
                     <input type="hidden" id="edit-shelter-id">
                     <div class="form-group">
-                        <label for="edit-shelter-type">Shelter Type:</label>
+                        <label for="edit-shelter-type" data-i18n="shelter_type_label">Shelter Type:</label>
                         <select id="edit-shelter-type">
-                            <option value="public_shelter">Public Shelter</option>
-                            <option value="building_shelter">Building Shelter</option>
-                            <option value="underground_parking">Underground Parking Lot</option>
+                            <option value="public_shelter" data-i18n="type_public">Public Shelter</option>
+                            <option value="building_shelter" data-i18n="type_building">Building Shelter</option>
+                            <option value="underground_parking" data-i18n="type_parking">Underground Parking Lot</option>
                         </select>
                     </div>
                     <div class="form-group" id="edit-floors-group" style="display: none;">
-                        <label for="edit-floors">Floors Underground:</label>
+                        <label for="edit-floors" data-i18n="floors_label">Floors Underground:</label>
                         <input type="number" id="edit-floors" min="1">
                     </div>
                     <div class="form-group">
-                        <label for="edit-description">Description (Optional):</label>
-                        <textarea id="edit-description" maxlength="1000" rows="3" placeholder="Enter description..."></textarea>
+                        <label for="edit-description" data-i18n="description_label">Description (Optional):</label>
+                        <textarea id="edit-description" maxlength="1000" rows="3" placeholder="Enter description..." data-i18n-placeholder="description_placeholder"></textarea>
                     </div>
-                    <button id="save-edit-btn" class="primary-btn">Update Shelter</button>
+                    <button id="save-edit-btn" class="primary-btn" data-i18n="update_shelter_btn">Update Shelter</button>
                 </div>
             </div>
 
             <div class="stats">
-                <p><strong>Total Shelters in Database: <span id="shelter-count">0</span></strong></p>
+                <p><strong data-i18n="total_shelters">Total Shelters in Database:</strong> <strong><span id="shelter-count">0</span></strong></p>
             </div>
 
             <div class="add-shelter-section">
-                <h3>Report a New Shelter</h3>
+                <h3 data-i18n="report_new_shelter">Report a New Shelter</h3>
                 <form id="add-shelter-form">
                     <div class="form-group">
-                        <label for="shelter-type">Shelter Type:</label>
+                        <label for="shelter-type" data-i18n="shelter_type_label">Shelter Type:</label>
                         <select id="shelter-type" required>
-                            <option value="" disabled selected>Select Type</option>
-                            <option value="public_shelter">Public Shelter</option>
-                            <option value="building_shelter">Building Shelter</option>
-                            <option value="underground_parking">Underground Parking Lot</option>
+                            <option value="" disabled selected data-i18n="select_type">Select Type</option>
+                            <option value="public_shelter" data-i18n="type_public">Public Shelter</option>
+                            <option value="building_shelter" data-i18n="type_building">Building Shelter</option>
+                            <option value="underground_parking" data-i18n="type_parking">Underground Parking Lot</option>
                         </select>
                     </div>
 
                     <div class="form-group" id="floors-group" style="display: none;">
-                        <label for="floors">Floors Underground:</label>
+                        <label for="floors" data-i18n="floors_label">Floors Underground:</label>
                         <input type="number" id="floors" min="1" placeholder="e.g. -2">
                     </div>
 
                     <div class="form-group">
-                        <label for="shelter-description">Description (Optional):</label>
-                        <textarea id="shelter-description" maxlength="1000" rows="3" placeholder="Describe the location, how to get there, etc."></textarea>
+                        <label for="shelter-description" data-i18n="description_label">Description (Optional):</label>
+                        <textarea id="shelter-description" maxlength="1000" rows="3" placeholder="Describe the location, how to get there, etc." data-i18n-placeholder="description_placeholder_long"></textarea>
                     </div>
                     <button type="submit" class="secondary-btn" style="background-color: #d32f2f;">
-                        📍 Report Current Location
+                        📍 <span data-i18n="report_btn">Report Current Location</span>
                     </button>
                 </form>
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 8.0</p>
+                <p>Version 9.0</p>
             </footer>
         </main>
     </div>

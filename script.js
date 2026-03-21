@@ -17,6 +17,145 @@ document.addEventListener('DOMContentLoaded', () => {
     const shelterDescriptionInput = document.getElementById('shelter-description');
     const statusMessage = document.getElementById('status-message');
     const shelterCountSpan = document.getElementById('shelter-count');
+    const langToggleBtn = document.getElementById('lang-toggle');
+
+    // --- Translations ---
+    const translations = {
+        en: {
+            app_title: "Red Alert Safe Zone",
+            app_subtitle: "Find the nearest secure place immediately.",
+            admin_login: "Admin Login",
+            admin_logout: "Logout",
+            guide_btn: "Guide me to closest shelter",
+            view_map_btn: "View All Shelters on Map",
+            manage_shelters_btn: "Manage Shelters (Admin)",
+            admin_login_title: "Admin Login",
+            password_placeholder: "Enter Password",
+            login_btn: "Login",
+            manage_shelters_title: "Manage Shelters",
+            edit_shelter_title: "Edit Shelter",
+            view_location_map: "View Location on Map",
+            shelter_type_label: "Shelter Type:",
+            type_public: "Public Shelter",
+            type_building: "Building Shelter",
+            type_parking: "Underground Parking Lot",
+            select_type: "Select Type",
+            floors_label: "Floors Underground:",
+            description_label: "Description (Optional):",
+            description_placeholder: "Enter description...",
+            description_placeholder_long: "Describe the location, how to get there, etc.",
+            update_shelter_btn: "Update Shelter",
+            total_shelters: "Total Shelters in Database:",
+            report_new_shelter: "Report a New Shelter",
+            report_btn: "Report Current Location",
+            status_locating: "Locating you...",
+            status_finding: "Finding nearest shelter...",
+            status_no_shelters: "No shelters found. Please add a shelter location first.",
+            status_error_loc: "Error accessing location: ",
+            status_getting_loc: "Getting location to add...",
+            status_added: "Shelter added successfully!",
+            status_failed_add: "Failed to add shelter: ",
+            status_updated: "Shelter updated.",
+            status_deleted: "Shelter deleted.",
+            status_logged_in: "Logged in as Admin.",
+            status_logged_out: "Logged out.",
+            status_failed_load: "Failed to load shelter list.",
+            floors_down: "floors down",
+            floors_count: "floors",
+            you_are_here: "You are here",
+            confirm_delete: "Are you sure you want to delete this shelter?"
+        },
+        he: {
+            app_title: "אזור בטוח - צבע אדום",
+            app_subtitle: "מצא את המרחב המוגן הקרוב ביותר מיד.",
+            admin_login: "כניסת מנהל",
+            admin_logout: "התנתק",
+            guide_btn: "נווט למקלט הקרוב ביותר",
+            view_map_btn: "הצג את כל המקלטים במפה",
+            manage_shelters_btn: "ניהול מקלטים (מנהל)",
+            admin_login_title: "כניסת מנהל",
+            password_placeholder: "הכנס סיסמה",
+            login_btn: "התחבר",
+            manage_shelters_title: "ניהול מקלטים",
+            edit_shelter_title: "עריכת מקלט",
+            view_location_map: "הצג מיקום במפה",
+            shelter_type_label: "סוג מקלט:",
+            type_public: "מקלט ציבורי",
+            type_building: "מקלט בבניין",
+            type_parking: "חניון תת קרקעי",
+            select_type: "בחר סוג",
+            floors_label: "קומות מתחת לקרקע:",
+            description_label: "תיאור (אופציונלי):",
+            description_placeholder: "הכנס תיאור...",
+            description_placeholder_long: "תאר את המיקום, איך להגיע וכו'.",
+            update_shelter_btn: "עדכן מקלט",
+            total_shelters: "סה\"כ מקלטים במאגר:",
+            report_new_shelter: "דווח על מקלט חדש",
+            report_btn: "דווח על המיקום הנוכחי",
+            status_locating: "מאתר מיקום...",
+            status_finding: "מחפש את המקלט הקרוב...",
+            status_no_shelters: "לא נמצאו מקלטים. אנא הוסף מיקום מקלט תחילה.",
+            status_error_loc: "שגיאה בגישה למיקום: ",
+            status_getting_loc: "מקבל מיקום להוספה...",
+            status_added: "המקלט נוסף בהצלחה!",
+            status_failed_add: "נכשל בהוספת מקלט: ",
+            status_updated: "המקלט עודכן.",
+            status_deleted: "המקלט נמחק.",
+            status_logged_in: "מחובר כמנהל.",
+            status_logged_out: "התנתק בהצלחה.",
+            status_failed_load: "נכשל בטעינת רשימת המקלטים.",
+            floors_down: "קומות למטה",
+            floors_count: "קומות",
+            you_are_here: "אתה כאן",
+            confirm_delete: "האם אתה בטוח שברצונך למחוק מקלט זה?"
+        }
+    };
+
+    let currentLang = localStorage.getItem('appLang') || 'he'; // Default to Hebrew
+    let t = translations[currentLang];
+
+    // Initialize Language
+    setLanguage(currentLang);
+
+    langToggleBtn.addEventListener('click', () => {
+        const newLang = currentLang === 'en' ? 'he' : 'en';
+        setLanguage(newLang);
+    });
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        t = translations[lang];
+        localStorage.setItem('appLang', lang);
+
+        // Update Direction
+        document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+
+        // Update Text Elements
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) {
+                el.textContent = t[key];
+            }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (t[key]) {
+                el.placeholder = t[key];
+            }
+        });
+
+        // Update Admin Button Dynamic State
+        if (adminToken) {
+            adminLoginBtn.textContent = t.admin_logout;
+        } else {
+            adminLoginBtn.textContent = t.admin_login;
+        }
+        
+        // Re-render things that depend on language (like lists)
+        renderAdminList();
+    }
 
     // Admin Elements
     const adminLoginBtn = document.getElementById('admin-login-btn');
@@ -52,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if already logged in
     if (adminToken) {
         adminPanelBtn.style.display = 'block';
-        adminLoginBtn.textContent = 'Logout';
+        adminLoginBtn.textContent = t.admin_logout;
     }
 
     // Render initial list
@@ -72,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderShelterStats();
         } catch (error) {
             console.error('Error fetching shelters:', error);
-            setStatus('Failed to load shelter list.');
+            setStatus(t.status_failed_load);
         }
     }
 
@@ -85,8 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
             adminToken = null;
             sessionStorage.removeItem('adminToken');
             adminPanelBtn.style.display = 'none';
-            adminLoginBtn.textContent = 'Admin Login';
-            setStatus('Logged out.');
+            adminLoginBtn.textContent = t.admin_login;
+            setStatus(t.status_logged_out);
         } else {
             loginModal.style.display = 'flex';
         }
@@ -103,10 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
             adminToken = password; 
             sessionStorage.setItem('adminToken', password);
             adminPanelBtn.style.display = 'block';
-            adminLoginBtn.textContent = 'Logout';
+            adminLoginBtn.textContent = t.admin_logout;
             loginModal.style.display = 'none';
             adminPasswordInput.value = '';
-            setStatus('Logged in as Admin.');
+            setStatus(t.status_logged_in);
         }
     });
 
@@ -124,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAdminList() {
         adminShelterList.innerHTML = '';
         if (shelters.length === 0) {
-            adminShelterList.innerHTML = '<p>No shelters found.</p>';
+            adminShelterList.innerHTML = `<p>${t.status_no_shelters}</p>`;
             return;
         }
 
@@ -132,15 +271,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'shelter-item';
             
-            let typeDisplay = shelter.type ? shelter.type.replace('_', ' ') : 'Shelter';
+            // Translate type
+            let typeKey = '';
+            if (shelter.type === 'public_shelter') typeKey = 'type_public';
+            else if (shelter.type === 'building_shelter') typeKey = 'type_building';
+            else if (shelter.type === 'underground_parking') typeKey = 'type_parking';
+            
+            let typeDisplay = t[typeKey] || shelter.type;
+
             if (shelter.type === 'underground_parking' && shelter.floors) {
-                typeDisplay += ` (${shelter.floors} floors)`;
+                typeDisplay += ` (${shelter.floors} ${t.floors_count})`;
             }
 
             item.innerHTML = `
                 <div class="shelter-info">
                     <strong>${shelter.name}</strong><br>
-                    Type: ${typeDisplay}<br>
+                    ${t.shelter_type_label} ${typeDisplay}<br>
                     <small>ID: ${shelter.id}</small>
                 </div>
                 <div class="admin-actions">
@@ -163,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delete Shelter
     async function deleteShelter(id) {
-        if (!confirm('Are you sure you want to delete this shelter?')) return;
+        if (!confirm(t.confirm_delete)) return;
 
         try {
             const response = await fetch(`${API_URL}/${id}`, {
@@ -180,11 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await fetchShelters(); // Refresh data
             renderAdminList(); // Refresh admin view
-            setStatus('Shelter deleted.');
+            setStatus(t.status_deleted);
         } catch (error) {
             alert(error.message);
         }
     }
+
 
     // Open Edit Modal
     function openEditModal(id) {
