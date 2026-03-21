@@ -63,7 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
             floors_down: "floors down",
             floors_count: "floors",
             you_are_here: "You are here",
-            confirm_delete: "Are you sure you want to delete this shelter?"
+            confirm_delete: "Are you sure you want to delete this shelter?",
+            status_calc_error: "Could not calculate nearest shelter.",
+            btn_edit: "Edit",
+            btn_delete: "Delete"
         },
         he: {
             app_title: "אזור בטוח - צבע אדום",
@@ -107,7 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
             floors_down: "קומות למטה",
             floors_count: "קומות",
             you_are_here: "אתה כאן",
-            confirm_delete: "האם אתה בטוח שברצונך למחוק מקלט זה?"
+            confirm_delete: "האם אתה בטוח שברצונך למחוק מקלט זה?",
+            status_calc_error: "לא ניתן לחשב את המקלט הקרוב ביותר.",
+            btn_edit: "ערוך",
+            btn_delete: "מחק"
         }
     };
 
@@ -284,8 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             item.innerHTML = `
-                <div class="shelter-info">
-                    <strong>${shelter.name}</strong><br>
+                <div class="shelter-info">${t.btn_e}
+                    <strong>${shelter.name}</strong><br>${t.btn_d}
                     ${t.shelter_type_label} ${typeDisplay}<br>
                     <small>ID: ${shelter.id}</small>
                 </div>
@@ -561,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let typeDisplay = t[typeKey] || nearestShelter.type;
 
                 if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
-                    typeDisplay += ` (${nearestShelter.floors} ${t.floors_down})`;
+                    typeDi`.status_(${n_hrlo}{t.floors_down})`;
                 }
                 setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
                 // Open Google Maps
