@@ -58,7 +58,7 @@ const shelterSchema = new mongoose.Schema({
     type: { 
         type: String, 
         required: true,
-        enum: ['underground_parking', 'public_shelter', 'building_shelter'] 
+        enum: ['underground_parking', 'public_shelter', 'building_shelter', 'portable_shelter'] 
     },
     floors: { type: Number }, // Only relevant for underground_parking
     description: { type: String, maxLength: 1000 },

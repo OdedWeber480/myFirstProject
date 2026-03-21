@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=28')
+        navigator.serviceWorker.register('./sw.js?v=29')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shelter_type_label: "Shelter Type:",
             type_public: "Public Shelter",
             type_building: "Building Shelter",
+            type_portable: "Portable Shelter",
             type_parking: "Underground Parking Lot",
             select_type: "Select Type",
             floors_label: "Floors Underground:",
@@ -151,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shelter_type_label: "סוג מקלט:",
             type_public: "מקלט ציבורי",
             type_building: "מקלט בבניין",
+            type_portable: "מיגונית",
             type_parking: "חניון תת קרקעי",
             select_type: "בחר סוג",
             floors_label: "קומות מתחת לקרקע:",
@@ -332,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let typeKey = '';
             if (shelter.type === 'public_shelter') typeKey = 'type_public';
             else if (shelter.type === 'building_shelter') typeKey = 'type_building';
+            else if (shelter.type === 'portable_shelter') typeKey = 'type_portable';
             else if (shelter.type === 'underground_parking') typeKey = 'type_parking';
             
             let typeDisplay = t[typeKey] || shelter.type;
@@ -505,6 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let typeKey = '';
             if (shelter.type === 'public_shelter') typeKey = 'type_public';
             else if (shelter.type === 'building_shelter') typeKey = 'type_building';
+            else if (shelter.type === 'portable_shelter') typeKey = 'type_portable';
             else if (shelter.type === 'underground_parking') typeKey = 'type_parking';
             
             let typeDisplay = t[typeKey] || shelter.type;
@@ -646,13 +650,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 let typeKey = '';
                 if (nearestShelter.type === 'public_shelter') typeKey = 'type_public';
                 else if (nearestShelter.type === 'building_shelter') typeKey = 'type_building';
+                else if (nearestShelter.type === 'portable_shelter') typeKey = 'type_portable';
                 else if (nearestShelter.type === 'underground_parking') typeKey = 'type_parking';
                 
                 let typeDisplay = t[typeKey] || nearestShelter.type;
 
-                // Populate Modal
-                nearestType.textContent = typeDisplay;
-                
                 if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
                      nearestFloorsContainer.style.display = 'block';
                      nearestFloors.textContent = nearestShelter.floors;
