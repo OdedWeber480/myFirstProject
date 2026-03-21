@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const guideBtn = document.getElementById('guide-btn');
+    const viewMapBtn = document.getElementById('view-map-btn');
+    const mapModal = document.getElementById('map-modal');
+    const closeMapBtn = document.getElementById('close-map-btn');
     const addShelterForm = document.getElementById('add-shelter-form');
     const shelterTypeSelect = document.getElementById('shelter-type');
     const floorsGroup = document.getElementById('floors-group');
@@ -17,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // API URL
     const API_URL = '/api/shelters';
     let shelters = [];
+    let map = null;
+    let userMarker = null;
 
     // Render initial list
     fetchShelters();
@@ -96,6 +101,67 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error(error);
             setStatus('Error accessing location: ' + error.message);
+        }
+    });
+
+    // Feature: View Map
+    viewMapBtn.addEventListener('click', async () => {
+        mapModal.style.display = 'flex';
+        
+        // Initialize map if not already initialized
+        if (!map) {
+            // Default center (Israel) if location fails
+            map = L.map('map').setView([31.0461, 34.8516], 8);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Try to center on user
+        try {
+            const position = await getCurrentLocation();
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            if (userMarker) map.removeLayer(userMarker);
+            
+            userMarker = L.marker([userLat, userLng])
+                .addTo(map)
+                .bindPopup('<b>You are here</b>')
+                .openPopup();
+                
+            map.setView([userLat, userLng], 13);
+        } catch (e) {
+            console.log("Could not get user location for map center");
+        }
+
+        // Add shelter markers
+        shelters.forEach(shelter => {
+            let typeDisplay = shelter.type ? shelter.type.replace('_', ' ') : 'Shelter';
+            if (shelter.type === 'underground_parking' && shelter.floors) {
+                typeDisplay += ` (${shelter.floors} floors down)`;
+            }
+            
+            L.marker([shelter.lat, shelter.lng])
+                .addTo(map)
+                .bindPopup(`<b>${shelter.name}</b><br>${typeDisplay}`);
+        });
+        
+        // Fix for map rendering in modal (invalidate size after modal is visible)
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    });
+
+    closeMapBtn.addEventListener('click', () => {
+        mapModal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === mapModal) {
+            mapModal.style.display = 'none';
         }
     });
 

@@ -8,6 +8,10 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d32f2f">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
     <div class="container">
@@ -17,12 +21,26 @@
         </header>
 
         <main>
-            <button id="guide-btn" class="primary-btn">
-                <span class="icon">🛡️</span>
-                Guide me to closest shelter
-            </button>
+            <div class="action-buttons">
+                <button id="guide-btn" class="primary-btn">
+                    <span class="icon">🛡️</span>
+                    Guide me to closest shelter
+                </button>
+                <button id="view-map-btn" class="secondary-btn" style="margin-top: 10px;">
+                    <span class="icon">🗺️</span>
+                    View All Shelters on Map
+                </button>
+            </div>
 
             <div id="status-message" class="status"></div>
+
+            <!-- Map Modal/Container -->
+            <div id="map-modal" class="map-modal" style="display: none;">
+                <div class="map-content">
+                    <button id="close-map-btn" class="close-btn">&times;</button>
+                    <div id="map"></div>
+                </div>
+            </div>
 
             <div class="stats">
                 <p><strong>Total Shelters in Database: <span id="shelter-count">0</span></strong></p>
