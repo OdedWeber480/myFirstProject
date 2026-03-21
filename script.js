@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await fetchShelters(); // Refresh data
             renderAdminList(); // Refresh admin view
             editModal.style.display = 'none';
-            setStatus('Shelter updated.');
+            setStatus(t.status_updated);
         } catch (error) {
             alert(error.message);
         }
@@ -436,9 +436,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addShelterMarkers(sheltersToShow) {
         sheltersToShow.forEach(shelter => {
-            let typeDisplay = shelter.type ? shelter.type.replace('_', ' ') : 'Shelter';
+            // Translate type for map
+            let typeKey = '';
+            if (shelter.type === 'public_shelter') typeKey = 'type_public';
+            else if (shelter.type === 'building_shelter') typeKey = 'type_building';
+            else if (shelter.type === 'underground_parking') typeKey = 'type_parking';
+            
+            let typeDisplay = t[typeKey] || shelter.type;
+
             if (shelter.type === 'underground_parking' && shelter.floors) {
-                typeDisplay += ` (${shelter.floors} floors down)`;
+                typeDisplay += ` (${shelter.floors} ${t.floors_down})`;
             }
             
             let popupContent = `<b>${shelter.name}</b><br>${typeDisplay}`;
@@ -473,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             userMarker = L.marker([userLat, userLng])
                 .addTo(map)
-                .bindPopup('<b>You are here</b>')
+                .bindPopup(`<b>${t.you_are_here}</b>`)
                 .openPopup();
                 
             map.setView([userLat, userLng], 13);
@@ -520,18 +527,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Feature 1: Guide to nearest shelter
     guideBtn.addEventListener('click', async () => {
         if (shelters.length === 0) {
-            setStatus('No shelters found. Please add a shelter location first.');
+            setStatus(t.status_no_shelters);
             return;
         }
 
-        setStatus('Locating you...');
+        setStatus(t.status_locating);
 
         try {
             const position = await getCurrentLocation();
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
 
-            setStatus('Finding nearest shelter...');
+            setStatus(t.status_finding);
 
             let minDistance = Infinity;
             let nearestShelter = null;
@@ -545,9 +552,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (nearestShelter) {
-                let typeDisplay = nearestShelter.type ? nearestShelter.type.replace('_', ' ') : 'Shelter';
+                // Translate type
+                let typeKey = '';
+                if (nearestShelter.type === 'public_shelter') typeKey = 'type_public';
+                else if (nearestShelter.type === 'building_shelter') typeKey = 'type_building';
+                else if (nearestShelter.type === 'underground_parking') typeKey = 'type_parking';
+                
+                let typeDisplay = t[typeKey] || nearestShelter.type;
+
                 if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
-                    typeDisplay += ` (${nearestShelter.floors} floors down)`;
+                    typeDisplay += ` (${nearestShelter.floors} ${t.floors_down})`;
                 }
                 setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
                 // Open Google Maps
@@ -558,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            setStatus('Error accessing location: ' + error.message);
+            setStatus(t.status_error_loc + error.message);
         }
     });
 
@@ -578,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addShelterForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        setStatus('Getting location to add...');
+        setStatus(t.status_getting_loc);
         try {
             const position = await getCurrentLocation();
             const lat = position.coords.latitude;
@@ -611,12 +625,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Server rejected data');
 
             await fetchShelters(); // Refresh list from server
-            setStatus('Shelter added successfully!');
+            setStatus(t.status_added);
             addShelterForm.reset();
             floorsGroup.style.display = 'none'; // Reset floor visibility
             
         } catch (error) {
-            setStatus('Failed to add shelter: ' + error.message);
+            setStatus(t.status_failed_add + error.message);
         }
     });
 
