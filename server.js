@@ -121,9 +121,27 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ error: 'Password required' });
         }
 
-        const admin = await Admin.findOne({ username: 'admin' });
+        let admin = await Admin.findOne({ username: 'admin' });
+        
+        // Lazy Initialization: If no admin exists, check if the provided password matches the init password
         if (!admin) {
-            return res.status(401).json({ error: 'Admin not configured' });
+            const initPassword = process.env.ADMIN_INIT_PASSWORD;
+            
+            if (initPassword && password === initPassword) {
+                console.log("Lazy initialization: Creating admin user from valid login attempt.");
+                const { salt, hash } = hashPassword(password);
+                admin = new Admin({
+                    username: 'admin',
+                    salt: salt,
+                    hash: hash
+                });
+                await admin.save();
+                console.log("Admin user created successfully.");
+            } else {
+                // If init password isn't set, or doesn't match
+                console.log("Login failed: Admin not configured and password did not match init password.");
+                return res.status(401).json({ error: 'Admin not configured' });
+            }
         }
 
         if (verifyPassword(password, admin.salt, admin.hash)) {
