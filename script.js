@@ -237,17 +237,33 @@ document.addEventListener('DOMContentLoaded', () => {
         loginModal.style.display = 'none';
     });
 
-    submitLoginBtn.addEventListener('click', () => {
+    submitLoginBtn.addEventListener('click', async () => {
         const password = adminPasswordInput.value;
         if (password) {
-            // We store the password as the token for simplicity as requested
-            adminToken = password; 
-            sessionStorage.setItem('adminToken', password);
-            adminPanelBtn.style.display = 'block';
-            adminLoginBtn.textContent = t.admin_logout;
-            loginModal.style.display = 'none';
-            adminPasswordInput.value = '';
-            setStatus(t.status_logged_in);
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    adminToken = data.token; 
+                    sessionStorage.setItem('adminToken', adminToken);
+                    adminPanelBtn.style.display = 'block';
+                    adminLoginBtn.textContent = t.admin_logout;
+                    loginModal.style.display = 'none';
+                    adminPasswordInput.value = '';
+                    setStatus(t.status_logged_in);
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed due to server error');
+            }
         }
     });
 
@@ -317,12 +333,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_URL}/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'x-admin-auth': adminToken
+                    'x-admin-token': adminToken
                 }
             });
 
             if (!response.ok) {
-                if (response.status === 403) throw new Error('Invalid Password');
+                if (response.status === 401) throw new Error('Unauthorized or Session Expired');
                 throw new Error('Failed to delete');
             }
 
@@ -331,6 +347,14 @@ document.addEventListener('DOMContentLoaded', () => {
             setStatus(t.status_deleted);
         } catch (error) {
             alert(error.message);
+            if (error.message.includes('Unauthorized')) {
+                // Force logout
+                adminToken = null;
+                sessionStorage.removeItem('adminToken');
+                adminPanelBtn.style.display = 'none';
+                adminLoginBtn.textContent = t.admin_login;
+                adminPanelModal.style.display = 'none';
+            }
         }
     }
 
@@ -381,13 +405,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-auth': adminToken
+                    'x-admin-token': adminToken
                 },
                 body: JSON.stringify({ type, floors, description })
             });
 
             if (!response.ok) {
-                if (response.status === 403) throw new Error('Invalid Password');
+                if (response.status === 401) throw new Error('Unauthorized or Session Expired');
                 throw new Error('Failed to update');
             }
 

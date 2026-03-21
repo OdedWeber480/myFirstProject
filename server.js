@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
+const crypto = require('crypto'); // Built-in Node.js crypto
 require('dotenv').config();
 
 const app = express();
@@ -18,14 +19,29 @@ if (!MONGODB_URI) {
     console.error('Error: MONGODB_URI is not defined in .env file');
 } else {
     mongoose.connect(MONGODB_URI)
-        .then(() => console.log('Connected to MongoDB'))
+        .then(() => {
+            console.log('Connected to MongoDB');
+            initializeAdmin(); // Check/Create Admin on startup
+        })
         .catch(err => console.error('Could not connect to MongoDB:', err));
 }
 
-// Admin Password (Hardcoded as per request, but ideally should be in env)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'SecureplacefinderMashoo1500!';
+// In-memory session store (simple implementation for this scale)
+// Map<token, timestamp>
+const sessions = new Map();
 
-// Schema Definition
+// --- Schemas ---
+
+// Admin Schema
+const adminSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    hash: { type: String, required: true },
+    salt: { type: String, required: true }
+});
+
+const Admin = mongoose.model('Admin', adminSchema);
+
+// Shelter Schema
 const shelterSchema = new mongoose.Schema({
     name: { type: String, required: true },
     type: { 
@@ -52,7 +68,96 @@ shelterSchema.set('toJSON', {
 
 const Shelter = mongoose.model('Shelter', shelterSchema);
 
-// API Routes
+// --- Auth Helpers ---
+
+function hashPassword(password) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return { salt, hash };
+}
+
+function verifyPassword(password, salt, storedHash) {
+    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return hash === storedHash;
+}
+
+async function initializeAdmin() {
+    try {
+        const adminExists = await Admin.findOne({ username: 'admin' });
+        if (!adminExists) {
+            console.log('Initializing default admin account...');
+            // The requested password
+            const password = process.env.ADMIN_INIT_PASSWORD;
+            if (!password) {
+                console.error("ADMIN_INIT_PASSWORD not set in environment variables. Cannot initialize admin.");
+                return;
+            }
+
+            const { salt, hash } = hashPassword(password);
+            
+            const newAdmin = new Admin({
+                username: 'admin',
+                salt: salt,
+                hash: hash
+            });
+            
+            await newAdmin.save();
+            console.log('Admin account created in database.');
+        } else {
+            console.log('Admin account already exists.');
+        }
+    } catch (error) {
+        console.error('Failed to initialize admin:', error);
+    }
+}
+
+// --- API Routes ---
+
+// Login Endpoint
+app.post('/api/login', async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password) {
+            return res.status(400).json({ error: 'Password required' });
+        }
+
+        const admin = await Admin.findOne({ username: 'admin' });
+        if (!admin) {
+            return res.status(401).json({ error: 'Admin not configured' });
+        }
+
+        if (verifyPassword(password, admin.salt, admin.hash)) {
+            // Generate Session Token
+            const token = crypto.randomBytes(32).toString('hex');
+            // Valid for 24 hours
+            sessions.set(token, Date.now() + 24 * 60 * 60 * 1000);
+            
+            res.json({ success: true, token: token });
+        } else {
+            res.status(401).json({ error: 'Invalid Password' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Middleware to verify session
+function authenticate(req, res, next) {
+    const token = req.headers['x-admin-token'];
+    
+    if (!token || !sessions.has(token)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const expiry = sessions.get(token);
+    if (Date.now() > expiry) {
+        sessions.delete(token);
+        return res.status(401).json({ error: 'Session expired' });
+    }
+
+    next();
+}
 
 // GET all shelters
 app.get('/api/shelters', async (req, res) => {
@@ -81,12 +186,7 @@ app.post('/api/shelters', async (req, res) => {
 });
 
 // UPDATE shelter (Admin only)
-app.put('/api/shelters/:id', async (req, res) => {
-    const adminAuth = req.headers['x-admin-auth'];
-    if (adminAuth !== ADMIN_PASSWORD) {
-        return res.status(403).json({ error: 'Unauthorized: Invalid Admin Password' });
-    }
-
+app.put('/api/shelters/:id', authenticate, async (req, res) => {
     try {
         const { type, floors, description } = req.body;
         const updateData = { type, description };
@@ -114,12 +214,7 @@ app.put('/api/shelters/:id', async (req, res) => {
 });
 
 // DELETE shelter (Admin only)
-app.delete('/api/shelters/:id', async (req, res) => {
-    const adminAuth = req.headers['x-admin-auth'];
-    if (adminAuth !== ADMIN_PASSWORD) {
-        return res.status(403).json({ error: 'Unauthorized: Invalid Admin Password' });
-    }
-
+app.delete('/api/shelters/:id', authenticate, async (req, res) => {
     try {
         const result = await Shelter.findByIdAndDelete(req.params.id);
         if (!result) {
