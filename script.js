@@ -1,8 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log('Service Worker Registered'))
+        navigator.serviceWorker.register('./sw.js?v=24')
+            .then(reg => {
+                console.log('Service Worker Registered');
+                
+                // Check for updates
+                reg.onupdatefound = () => {
+                    const newWorker = reg.installing;
+                    newWorker.onstatechange = () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New content available, force refresh
+                            console.log('New content available, refreshing...');
+                            window.location.reload();
+                        }
+                    };
+                };
+            })
             .catch(err => console.error('Service Worker Failed', err));
     }
 

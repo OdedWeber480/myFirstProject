@@ -12,7 +12,18 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// Serve static files with custom headers for caching
+app.use(express.static(__dirname, {
+    setHeaders: function (res, path, stat) {
+        // Prevent caching of service worker and index.html to ensure updates are seen immediately
+        if (path.endsWith('sw.js') || path.endsWith('index.html')) {
+            res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.set('Pragma', 'no-cache');
+            res.set('Expires', '0');
+        }
+    }
+}));
 
 // MongoDB Connection
 if (!MONGODB_URI) {
