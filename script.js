@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             select_type: "בחר סוג",
             floors_label: "קומות מתחת לקרקע:",
             description_label: "תיאור (אופציונלי):",
-    etio    total_shelters: "סה\"כ מקלטים במאגר:",
+            total_shelters: "סה\"כ מקלטים במאגר:",
             report_new_shelter: "דווח על מקלט חדש",
             report_btn: "דווח על המיקום הנוכחי",
             status_locating: "מאתר מיקום...",
@@ -148,51 +148,47 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLang = localStorage.getItem('appLang') || 'he'; // Default to Hebrew
     let t = translations[currentLang];
 
-    // Initialize Language
+    function setLanguage(lang) {
+        currentLang = lang;
+        t = translations[lang];
+        localStorage.setItem('appLang', lang);
+
+        // Update Direction
+        document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+
+        // Update Text Elements
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) {
+                el.textContent = t[key];
+            }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (t[key]) {
+                el.placeholder = t[key];
+            }
+        });
+
+        // Update Admin Button Dynamic State
+        if (adminToken) {
+            adminLoginBtn.textContent = t.admin_logout;
+        } else {
+            adminLoginBtn.textContent = t.admin_login;
+        }
+        
+        // Re-render things that depend on language (like lists)
+        renderAdminList();
+    }
+
     setLanguage(currentLang);
 
     langToggleBtn.addEventListener('click', () => {
         const newLang = currentLang === 'en' ? 'he' : 'en';
         setLanguage(newLang);
     });
-
-    function setLanguage(lang) {
-        currentLang = lang;
-        t = translations[lang];
-        localStorage.setItem('appLang', lang);
-e.c z  .a-t]
-     ltty'g- are
-
-    // Admin Elements
-    const adminLoginBtn = document.getElementById('admin-login-btn');
-    const adminPanelBtn = document.getElementById('admin-panel-btn');
-    const loginModal = document.getElementById('login-modal');
-    const closeLoginBtn = document.getElementById('close-login-btn');
-    const submitLoginBtn = document.getElementById('submit-login-btn');
-    const adminPasswordInput = document.getElementById('admin-password');
-    const adminPanelModal = document.getElementById('admin-panel-modal');
-    const closeAdminPanelBtn = document.getElementById('close-admin-panel-btn');
-    const adminShelterList = document.getElementById('admin-shelter-list');
-    
-    // Edit Elements
-    const editModal = document.getElementById('edit-modal');
-    const closeEditBtn = document.getElementById('close-edit-btn');
-    const saveEditBtn = document.getElementById('save-edit-btn');
-    const editShelterId = document.getElementById('edit-shelter-id');
-    const editShelterType = document.getElementById('edit-shelter-type');
-    const editFloorsGroup = document.getElementById('edit-floors-group');
-    const editFloorsInput = document.getElementById('edit-floors');
-    const editDescriptionInput = document.getElementById('edit-description');
-    const editViewMapBtn = document.getElementById('edit-view-map-btn');
-
-    // API URL
-    const API_URL = '/api/shelters';
-    let shelters = [];
-    let map = null;
-    let userMarker = null;
-    let mapMarkers = [];
-    let adminToken = sessionStorage.getItem('adminToken') || null;
-    let currentEditShelterId = null;
 
     // Check if already logged in
     if (adminToken) {
