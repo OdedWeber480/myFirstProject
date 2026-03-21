@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userMarker = null;
     let mapMarkers = [];
     let adminToken = sessionStorage.getItem('adminToken') || null;
+    let currentEditShelterId = null;
 
     // Check if already logged in
     if (adminToken) {
