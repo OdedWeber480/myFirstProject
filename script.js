@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Open Google Maps
                 window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearestShelter.lat},${nearestShelter.lng}&travelmode=walking`, '_blank');
             } else {
-                setStatus('Could not calculate nearest shelter.');
+                setStatus(t.status_calc_error);
             }
 
         } catch (error) {
