@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- CACHE BUSTING FOR MISSING OPTIONS ---
+    // If the new 'portable_shelter' option is missing, it means we have stale HTML.
+    // Force a hard reload/cache clear.
+    if (!document.getElementById('option-portable')) {
+        console.warn('Detected stale HTML (missing portable option). Forcing reload...');
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+                window.location.reload();
+            });
+        } else {
+            window.location.reload();
+        }
+        return; // Stop execution
+    }
+    // ------------------------------------------
+
     const addShelterForm = document.getElementById('add-shelter-form');
     const shelterTypeSelect = document.getElementById('shelter-type');
     const floorsGroup = document.getElementById('floors-group');

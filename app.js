@@ -1,7 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- CACHE BUSTING FOR MISSING OPTIONS ---
+    // Check if the edit modal has the new option. If not, force reload.
+    // We need to wait a tick because the modal HTML is in the DOM but maybe the browser
+    // hasn't fully parsed/updated if it was serving a stale cached version of index.html.
+    setTimeout(() => {
+        if (!document.getElementById('edit-option-portable')) {
+            console.warn('Detected stale HTML (missing portable option in edit modal). Forcing reload...');
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                    window.location.reload(true);
+                });
+            } else {
+                window.location.reload(true);
+            }
+        }
+    }, 1000);
+    // ------------------------------------------
+
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=29')
+        navigator.serviceWorker.register('./sw.js?v=30')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
