@@ -1,4 +1,4 @@
-const CACHE_NAME = 'secure-place-v4';
+const CACHE_NAME = 'secure-place-v5';
 const ASSETS = [
   './',
   './index.html',

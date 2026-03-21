@@ -220,11 +220,15 @@ select, input {
 .text-btn {
     background: none;
     border: none;
-    color: white;
+    color: #555;
     text-decoration: underline;
     cursor: pointer;
     font-size: 0.9rem;
     margin-top: 5px;
+}
+
+.text-btn:hover {
+    color: #d32f2f;
 }
 
 /* Admin List Styles */
