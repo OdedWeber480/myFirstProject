@@ -327,14 +327,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Admin Functions ---
-upAmUI() // Up aaUIo out
+    
+    // Toggle Login Modal
     adminLoginBtn.addEventListener('click', () => {
         if (adminToken) {
             // Logout
             adminToken = null;
             sessionStorage.removeItem('adminToken');
-            adminPanelBtn.style.display = 'none';
-            adminLoginBtn.textContent = t.admin_login;
+            updateAdminUI(); // Update UI on logout
             setStatus(t.status_logged_out);
         } else {
             loginModal.style.display = 'flex';
@@ -353,14 +353,14 @@ upAmUI() // Up aaUIo out
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password })
-                });upAmnUI()//UpdUIo in
+                });
+
                 const data = await response.json();
 
                 if (response.ok && data.success) {
                     adminToken = data.token; 
                     sessionStorage.setItem('adminToken', adminToken);
-                    adminPanelBtn.style.display = 'block';
-                    adminLoginBtn.textContent = t.admin_logout;
+                    updateAdminUI(); // Update UI on login
                     loginModal.style.display = 'none';
                     adminPasswordInput.value = '';
                     setStatus(t.status_logged_in);
