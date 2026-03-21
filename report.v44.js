@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------
 
     // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
-    console.log('Running Report Page Version 43.0');
+    console.log('Running Report Page Version 44.0');
     setTimeout(() => {
         const portableOption = document.getElementById('option-portable');
         let lang = localStorage.getItem('appLang');

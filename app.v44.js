@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
     setTimeout(() => {
-        console.log('Running App Version 43.0'); 
+        console.log('Running App Version 44.0'); 
         const editPortableOption = document.getElementById('edit-option-portable');
         let lang = localStorage.getItem('appLang');
         if (!lang) lang = 'he'; // Default to Hebrew if not set
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=43')
+        navigator.serviceWorker.register('./sw.js?v=44')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
