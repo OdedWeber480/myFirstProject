@@ -20,9 +20,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
     // ------------------------------------------
 
+    // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
+    setTimeout(() => {
+        console.log('Running App Version 41.0'); 
+        const editPortableOption = document.getElementById('edit-option-portable');
+        let lang = localStorage.getItem('appLang');
+        if (!lang) lang = 'he'; // Default to Hebrew if not set
+
+        if (editPortableOption && lang === 'he' && editPortableOption.textContent.trim() === 'Portable Shelter') {
+             console.warn('Detected stale translations in Admin Modal. Forcing reload...');
+             if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                    window.location.reload(true);
+                });
+            } else {
+                window.location.reload(true);
+            }
+        }
+    }, 2000);
+    // ------------------------------------------
+
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=30')
+        navigator.serviceWorker.register('./sw.js?v=41')
             .then(reg => {
                 console.log('Service Worker Registered');
                 

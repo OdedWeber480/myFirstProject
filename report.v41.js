@@ -18,6 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // ------------------------------------------
 
+    // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
+    console.log('Running Report Page Version 41.0');
+    setTimeout(() => {
+        const portableOption = document.getElementById('option-portable');
+        let lang = localStorage.getItem('appLang');
+        if (!lang) lang = 'he'; // Default to Hebrew if not set
+
+        // Check if we are in Hebrew mode
+        if (lang === 'he') {
+            // Check if the element exists and still has English text
+            if (portableOption && portableOption.textContent.trim() === 'Portable Shelter') {
+                console.warn('Detected stale translations (Hebrew default/selected but showing English). Forcing reload...');
+                 if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        for (let registration of registrations) {
+                            registration.unregister();
+                        }
+                        window.location.reload(true);
+                    });
+                } else {
+                    window.location.reload(true);
+                }
+            }
+        }
+    }, 2000);
+    // ------------------------------------------
+
     const addShelterForm = document.getElementById('add-shelter-form');
     const shelterTypeSelect = document.getElementById('shelter-type');
     const floorsGroup = document.getElementById('floors-group');
@@ -72,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
             report_subtitle: "עזור לאחרים על ידי הוספת מיקום מרחב מוגן.",
             shelter_type_label: "סוג מקלט:",
             type_public: "מקלט ציבורי",
-            type_bortable: "מיגונית",
-            type_puilding: "מקלט בבניין",
+            type_building: "מקלט בבניין",
+            type_portable: "מיגונית",
             type_parking: "חניון תת קרקעי",
             select_type: "בחר סוג",
             floors_label: "קומות מתחת לקרקע:",
