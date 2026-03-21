@@ -102,34 +102,13 @@
 
             <div class="add-shelter-section">
                 <h3 data-i18n="report_new_shelter">Report a New Shelter</h3>
-                <form id="add-shelter-form">
-                    <div class="form-group">
-                        <label for="shelter-type" data-i18n="shelter_type_label">Shelter Type:</label>
-                        <select id="shelter-type" required>
-                            <option value="" disabled selected data-i18n="select_type">Select Type</option>
-                            <option value="public_shelter" data-i18n="type_public">Public Shelter</option>
-                            <option value="building_shelter" data-i18n="type_building">Building Shelter</option>
-                            <option value="underground_parking" data-i18n="type_parking">Underground Parking Lot</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" id="floors-group" style="display: none;">
-                        <label for="floors" data-i18n="floors_label">Floors Underground:</label>
-                        <input type="number" id="floors" min="1" placeholder="e.g. -2">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="shelter-description" data-i18n="description_label">Description (Optional):</label>
-                        <textarea id="shelter-description" maxlength="1000" rows="3" placeholder="Describe the location, how to get there, etc." data-i18n-placeholder="description_placeholder_long"></textarea>
-                    </div>
-                    <button type="submit" class="secondary-btn" style="background-color: #d32f2f;">
-                        📍 <span data-i18n="report_btn">Report Current Location</span>
-                    </button>
-                </form>
+                <a href="report.html" class="secondary-btn" style="background-color: #d32f2f; display: block; text-align: center; text-decoration: none;">
+                    📍 <span data-i18n="report_btn">Report Current Location</span>
+                </a>
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 21.0</p>
+                <p>Version 22.0</p>
             </footer>
         </main>
     </div>

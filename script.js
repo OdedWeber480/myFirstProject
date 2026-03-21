@@ -10,11 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewMapBtn = document.getElementById('view-map-btn');
     const mapModal = document.getElementById('map-modal');
     const closeMapBtn = document.getElementById('close-map-btn');
-    const addShelterForm = document.getElementById('add-shelter-form');
-    const shelterTypeSelect = document.getElementById('shelter-type');
-    const floorsGroup = document.getElementById('floors-group');
-    const floorsInput = document.getElementById('floors');
-    const shelterDescriptionInput = document.getElementById('shelter-description');
+    // Form elements removed - moved to report.html
     const statusMessage = document.getElementById('status-message');
     const shelterCountSpan = document.getElementById('shelter-count');
     const langToggleBtn = document.getElementById('lang-toggle');
@@ -618,71 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setStatus(t.status_error_loc + error.message);
         }
     });
-
-    // Handle Shelter Type Change (Show/Hide Floors)
-    shelterTypeSelect.addEventListener('change', () => {
-        if (shelterTypeSelect.value === 'underground_parking') {
-            floorsGroup.style.display = 'block';
-            floorsInput.required = true;
-        } else {
-            floorsGroup.style.display = 'none';
-            floorsInput.required = false;
-            floorsInput.value = '';
-        }
-    });
-
-    // Feature 2: Add current location as shelter (Form Submission)
-    addShelterForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        setStatus(t.status_getting_loc);
-        try {
-            const position = await getCurrentLocation();
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            
-            const type = shelterTypeSelect.value;
-            const floors = floorsInput.value ? parseInt(floorsInput.value) : null;
-            const description = shelterDescriptionInput.value;
-            
-            const name = `Shelter (${new Date().toLocaleTimeString()})`;
-            
-            const newShelter = {
-                name: name,
-                lat: lat,
-                lng: lng,
-                type: type,
-                floors: floors,
-                description: description
-            };
-
-            // Send to server
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(newShelter)
-            });
-
-            if (!response.ok) throw new Error('Server rejected data');
-
-            await fetchShelters(); // Refresh list from server
-            setStatus(t.status_added);
-            addShelterForm.reset();
-            floorsGroup.style.display = 'none'; // Reset floor visibility
-            
-        } catch (error) {
-            setStatus(t.status_failed_add + error.message);
-        }
-    });
-
-    // Render Stats (instead of list)
-    function renderShelterStats() {
-        if (shelterCountSpan) {
-            shelterCountSpan.textContent = shelters.length;
-        }
-    }
 
     // Haversine formula to calculate distance in km
 

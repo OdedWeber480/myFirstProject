@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Shelter - Secure Place Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="theme-color" content="#d32f2f">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <button id="lang-toggle" class="icon-btn">🇺🇸 / 🇮🇱</button>
+                <a href="index.html" class="icon-btn">🏠</a>
+            </div>
+            <h1 data-i18n="report_new_shelter">Report a New Shelter</h1>
+            <p data-i18n="report_subtitle">Help others by adding a safe zone location.</p>
+        </header>
+
+        <main>
+            <div id="status-message" class="status"></div>
+
+            <div class="add-shelter-section" style="border-top: none; margin-top: 0;">
+                <form id="add-shelter-form">
+                    <div class="form-group">
+                        <label for="shelter-type" data-i18n="shelter_type_label">Shelter Type:</label>
+                        <select id="shelter-type" required>
+                            <option value="" disabled selected data-i18n="select_type">Select Type</option>
+                            <option value="public_shelter" data-i18n="type_public">Public Shelter</option>
+                            <option value="building_shelter" data-i18n="type_building">Building Shelter</option>
+                            <option value="underground_parking" data-i18n="type_parking">Underground Parking Lot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="floors-group" style="display: none;">
+                        <label for="floors" data-i18n="floors_label">Floors Underground:</label>
+                        <input type="number" id="floors" min="1" placeholder="e.g. -2">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shelter-description" data-i18n="description_label">Description (Optional):</label>
+                        <textarea id="shelter-description" maxlength="1000" rows="5" placeholder="Describe the location, how to get there, etc." data-i18n-placeholder="description_placeholder_long"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="secondary-btn" style="background-color: #d32f2f; margin-top: 20px;">
+                        📍 <span data-i18n="report_btn">Report Current Location</span>
+                    </button>
+                    
+                    <button type="button" id="cancel-btn" class="secondary-btn" style="background-color: #757575; margin-top: 10px;">
+                        <span data-i18n="cancel_btn">Cancel</span>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="report.js"></script>
+</body>
+</html>
