@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const shelterTypeSelect = document.getElementById('shelter-type');
     const floorsGroup = document.getElementById('floors-group');
     const floorsInput = document.getElementById('floors');
+    const shelterDescriptionInput = document.getElementById('shelter-description');
     const statusMessage = document.getElementById('status-message');
     const shelterCountSpan = document.getElementById('shelter-count');
 
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editShelterType = document.getElementById('edit-shelter-type');
     const editFloorsGroup = document.getElementById('edit-floors-group');
     const editFloorsInput = document.getElementById('edit-floors');
+    const editDescriptionInput = document.getElementById('edit-description');
     const editViewMapBtn = document.getElementById('edit-view-map-btn');
 
     // API URL
@@ -192,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentEditShelterId = id;
         editShelterId.value = shelter.id;
         editShelterType.value = shelter.type || 'public_shelter';
+        editDescriptionInput.value = shelter.description || '';
         
         if (shelter.type === 'underground_parking') {
             editFloorsGroup.style.display = 'block';
@@ -222,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = editShelterId.value;
         const type = editShelterType.value;
         const floors = editFloorsInput.value ? parseInt(editFloorsInput.value) : null;
+        const description = editDescriptionInput.value;
 
         try {
             const response = await fetch(`${API_URL}/${id}`, {
@@ -230,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                     'x-admin-auth': adminToken
                 },
-                body: JSON.stringify({ type, floors })
+                body: JSON.stringify({ type, floors, description })
             });
 
             if (!response.ok) {
@@ -267,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!map) {
             map = L.map('map').setView([31.0461, 34.8516], 8);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: ' OpenStreetMap contributors'
+                attribution: '© OpenStreetMap contributors'
             }).addTo(map);
         }
     }
@@ -290,9 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 typeDisplay += ` (${shelter.floors} floors down)`;
             }
             
+            let popupContent = `<b>${shelter.name}</b><br>${typeDisplay}`;
+            if (shelter.description) {
+                popupContent += `<br><br><i>${shelter.description}</i>`;
+            }
+            
             const marker = L.marker([shelter.lat, shelter.lng])
                 .addTo(map)
-                .bindPopup(`<b>${shelter.name}</b><br>${typeDisplay}`);
+                .bindPopup(popupContent);
             
             mapMarkers.push(marker);
             
@@ -430,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const type = shelterTypeSelect.value;
             const floors = floorsInput.value ? parseInt(floorsInput.value) : null;
+            const description = shelterDescriptionInput.value;
             
             const name = `Shelter (${new Date().toLocaleTimeString()})`;
             
@@ -438,7 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 lat: lat,
                 lng: lng,
                 type: type,
-                floors: floors
+                floors: floors,
+                description: description
             };
 
             // Send to server

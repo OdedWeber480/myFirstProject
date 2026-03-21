@@ -85,6 +85,10 @@
                         <label for="edit-floors">Floors Underground:</label>
                         <input type="number" id="edit-floors" min="1">
                     </div>
+                    <div class="form-group">
+                        <label for="edit-description">Description (Optional):</label>
+                        <textarea id="edit-description" maxlength="1000" rows="3" placeholder="Enter description..."></textarea>
+                    </div>
                     <button id="save-edit-btn" class="primary-btn">Update Shelter</button>
                 </div>
             </div>
@@ -99,7 +103,7 @@
                     <div class="form-group">
                         <label for="shelter-type">Shelter Type:</label>
                         <select id="shelter-type" required>
-                            <option value="" disabled selected>Select type</option>
+                            <option value="" disabled selected>Select Type</option>
                             <option value="public_shelter">Public Shelter</option>
                             <option value="building_shelter">Building Shelter</option>
                             <option value="underground_parking">Underground Parking Lot</option>
@@ -108,10 +112,16 @@
 
                     <div class="form-group" id="floors-group" style="display: none;">
                         <label for="floors">Floors Underground:</label>
-                        <input type="number" id="floors" min="1" placeholder="e.g. 2">
+                        <input type="number" id="floors" min="1" placeholder="e.g. -2">
                     </div>
 
-                    <button type="submit" class="secondary-btn">Add Current Location</button>
+                    <div class="form-group">
+                        <label for="shelter-description">Description (Optional):</label>
+                        <textarea id="shelter-description" maxlength="1000" rows="3" placeholder="Describe the location, how to get there, etc."></textarea>
+                    </div>
+                    <button type="submit" class="secondary-btn" style="background-color: #d32f2f;">
+                        📍 Report Current Location
+                    </button>
                 </form>
             </div>
         </main>

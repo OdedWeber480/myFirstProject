@@ -117,13 +117,18 @@ label {
     color: #555;
 }
 
-select, input {
+select, input, textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
     box-sizing: border-box; /* Ensures padding doesn't affect width */
+    font-family: inherit;
+}
+
+textarea {
+    resize: vertical;
 }
 
 /* Map Modal Styles */
