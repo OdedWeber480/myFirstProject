@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
     setTimeout(() => {
-        console.log('Running App Version 42.0'); 
+        console.log('Running App Version 43.0'); 
         const editPortableOption = document.getElementById('edit-option-portable');
         let lang = localStorage.getItem('appLang');
         if (!lang) lang = 'he'; // Default to Hebrew if not set
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=42')
+        navigator.serviceWorker.register('./sw.js?v=43')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminPanelModal = document.getElementById('admin-panel-modal');
     const closeAdminPanelBtn = document.getElementById('close-admin-panel-btn');
     const adminShelterList = document.getElementById('admin-shelter-list');
+    const addShelterContainer = document.getElementById('add-shelter-container'); // NEW
     
     // Edit Elements
     const editModal = document.getElementById('edit-modal');
@@ -258,11 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Update Admin Button Dynamic State
-        if (adminToken) {
-            adminLoginBtn.textContent = t.admin_logout;
-        } else {
-            adminLoginBtn.textContent = t.admin_login;
-        }
+        updateAdminUI();
         
         // Re-render things that depend on language (like lists)
         renderAdminList();
@@ -275,11 +272,21 @@ document.addEventListener('DOMContentLoaded', () => {
         setLanguage(newLang);
     });
 
-    // Check if already logged in
-    if (adminToken) {
-        adminPanelBtn.style.display = 'block';
-        adminLoginBtn.textContent = t.admin_logout;
+    // Helper: Update UI based on Admin Status
+    function updateAdminUI() {
+        if (adminToken) {
+            adminPanelBtn.style.display = 'block';
+            adminLoginBtn.textContent = t.admin_logout;
+            if (addShelterContainer) addShelterContainer.style.display = 'block'; // Show Report Button
+        } else {
+            adminPanelBtn.style.display = 'none';
+            adminLoginBtn.textContent = t.admin_login;
+            if (addShelterContainer) addShelterContainer.style.display = 'none'; // Hide Report Button
+        }
     }
+
+    // Check if already logged in
+    updateAdminUI();
 
     // Render initial list
     fetchShelters();
@@ -320,8 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Admin Functions ---
-
-    // Toggle Login Modal
+upAmUI() // Up aaUIo out
     adminLoginBtn.addEventListener('click', () => {
         if (adminToken) {
             // Logout
@@ -347,8 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password })
-                });
-
+                });upAmnUI()//UpdUIo in
                 const data = await response.json();
 
                 if (response.ok && data.success) {

@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.static(__dirname, {
     setHeaders: function (res, path, stat) {
         // Prevent caching of critical files to ensure updates are seen immediately
-        if (path.endsWith('sw.js') || path.endsWith('index.html') || path.endsWith('app.v42.js') || path.endsWith('main.css') || path.endsWith('report.v42.js')) {
+        if (path.endsWith('sw.js') || path.endsWith('index.html') || path.endsWith('app.v43.js') || path.endsWith('main.css') || path.endsWith('report.v43.js')) {
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.set('Pragma', 'no-cache');
             res.set('Expires', '0');
@@ -198,8 +198,8 @@ app.get('/api/shelters', async (req, res) => {
     }
 });
 
-// POST new shelter
-app.post('/api/shelters', async (req, res) => {
+// POST new shelter (Admin only)
+app.post('/api/shelters', authenticate, async (req, res) => {
     try {
         const { name, lat, lng, type, floors, description } = req.body;
         if (!name || !lat || !lng || !type) {
