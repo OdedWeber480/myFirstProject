@@ -1,13 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const path = require('path');
-const crypto = require('crypto'); // Built-in Node.js crypto
+const fs = require('fs').promises; // Use fs.promises
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI;
+const DATA_FILE = path.join(__dirname, 'shelters.json');
+const ADMIN_FILE = path.join(__dirname, 'admin.json');
 
 // Middleware
 app.use(cors());
@@ -25,59 +26,27 @@ app.use(express.static(__dirname, {
     }
 }));
 
-// MongoDB Connection
-if (!MONGODB_URI) {
-    console.error('Error: MONGODB_URI is not defined in .env file');
-} else {
-    mongoose.connect(MONGODB_URI)
-        .then(() => {
-            console.log('Connected to MongoDB');
-            initializeAdmin(); // Check/Create Admin on startup
-        })
-        .catch(err => console.error('Could not connect to MongoDB:', err));
-}
-
-// In-memory session store (simple implementation for this scale)
-// Map<token, timestamp>
+// In-memory session store
 const sessions = new Map();
 
-// --- Schemas ---
+// --- Helper Functions for File Persistence ---
 
-// Admin Schema
-const adminSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    hash: { type: String, required: true },
-    salt: { type: String, required: true }
-});
-
-const Admin = mongoose.model('Admin', adminSchema);
-
-// Shelter Schema
-const shelterSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    type: { 
-        type: String, 
-        required: true,
-        enum: ['underground_parking', 'public_shelter', 'building_shelter', 'portable_shelter'] 
-    },
-    floors: { type: Number }, // Only relevant for underground_parking
-    description: { type: String, maxLength: 1000 },
-    lat: { type: Number, required: true },
-    lng: { type: Number, required: true },
-    createdAt: { type: Date, default: Date.now }
-});
-
-// Transform _id to id for frontend compatibility
-shelterSchema.set('toJSON', {
-    virtuals: true,
-    versionKey: false,
-    transform: function (doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
+async function readData(filePath) {
+    try {
+        const data = await fs.readFile(filePath, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        // If file doesn't exist, return empty structure
+        if (error.code === 'ENOENT') {
+            return filePath === DATA_FILE ? [] : null;
+        }
+        throw error;
     }
-});
+}
 
-const Shelter = mongoose.model('Shelter', shelterSchema);
+async function writeData(filePath, data) {
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+}
 
 // --- Auth Helpers ---
 
@@ -92,35 +61,39 @@ function verifyPassword(password, salt, storedHash) {
     return hash === storedHash;
 }
 
+// Initialize Admin
 async function initializeAdmin() {
     try {
-        const adminExists = await Admin.findOne({ username: 'admin' });
-        if (!adminExists) {
+        let admin = await readData(ADMIN_FILE);
+        
+        if (!admin) {
             console.log('Initializing default admin account...');
-            // The requested password
             const password = process.env.ADMIN_INIT_PASSWORD;
+            
             if (!password) {
-                console.error("ADMIN_INIT_PASSWORD not set in environment variables. Cannot initialize admin.");
+                console.warn("ADMIN_INIT_PASSWORD not set. Admin features will be disabled until configured.");
                 return;
             }
 
             const { salt, hash } = hashPassword(password);
-            
-            const newAdmin = new Admin({
+            admin = {
                 username: 'admin',
                 salt: salt,
                 hash: hash
-            });
+            };
             
-            await newAdmin.save();
-            console.log('Admin account created in database.');
+            await writeData(ADMIN_FILE, admin);
+            console.log('Admin account created in admin.json.');
         } else {
-            console.log('Admin account already exists.');
+            console.log('Admin account loaded from admin.json.');
         }
     } catch (error) {
         console.error('Failed to initialize admin:', error);
     }
 }
+
+// Call init
+initializeAdmin();
 
 // --- API Routes ---
 
@@ -132,35 +105,24 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ error: 'Password required' });
         }
 
-        let admin = await Admin.findOne({ username: 'admin' });
+        let admin = await readData(ADMIN_FILE);
         
-        // Lazy Initialization: If no admin exists, check if the provided password matches the init password
+        // Lazy Initialization
         if (!admin) {
             const initPassword = process.env.ADMIN_INIT_PASSWORD;
-            
             if (initPassword && password === initPassword) {
-                console.log("Lazy initialization: Creating admin user from valid login attempt.");
+                console.log("Lazy initialization: Creating admin user.");
                 const { salt, hash } = hashPassword(password);
-                admin = new Admin({
-                    username: 'admin',
-                    salt: salt,
-                    hash: hash
-                });
-                await admin.save();
-                console.log("Admin user created successfully.");
+                admin = { username: 'admin', salt, hash };
+                await writeData(ADMIN_FILE, admin);
             } else {
-                // If init password isn't set, or doesn't match
-                console.log("Login failed: Admin not configured and password did not match init password.");
                 return res.status(401).json({ error: 'Admin not configured' });
             }
         }
 
         if (verifyPassword(password, admin.salt, admin.hash)) {
-            // Generate Session Token
             const token = crypto.randomBytes(32).toString('hex');
-            // Valid for 24 hours
             sessions.set(token, Date.now() + 24 * 60 * 60 * 1000);
-            
             res.json({ success: true, token: token });
         } else {
             res.status(401).json({ error: 'Invalid Password' });
@@ -174,26 +136,26 @@ app.post('/api/login', async (req, res) => {
 // Middleware to verify session
 function authenticate(req, res, next) {
     const token = req.headers['x-admin-token'];
-    
     if (!token || !sessions.has(token)) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-
     const expiry = sessions.get(token);
     if (Date.now() > expiry) {
         sessions.delete(token);
         return res.status(401).json({ error: 'Session expired' });
     }
-
     next();
 }
 
 // GET all shelters
 app.get('/api/shelters', async (req, res) => {
     try {
-        const shelters = await Shelter.find().sort({ createdAt: -1 });
+        const shelters = await readData(DATA_FILE);
+        // Sort by createdAt descending (newest first)
+        shelters.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.json(shelters);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Failed to fetch shelters' });
     }
 });
@@ -206,10 +168,25 @@ app.post('/api/shelters', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const newShelter = new Shelter({ name, lat, lng, type, floors, description });
-        const savedShelter = await newShelter.save();
-        res.status(201).json(savedShelter);
+        const shelters = await readData(DATA_FILE);
+        
+        const newShelter = {
+            id: crypto.randomUUID(), // Generate a unique ID
+            name,
+            lat,
+            lng,
+            type,
+            floors,
+            description,
+            createdAt: new Date().toISOString()
+        };
+
+        shelters.push(newShelter);
+        await writeData(DATA_FILE, shelters);
+        
+        res.status(201).json(newShelter);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Failed to save shelter' });
     }
 });
@@ -217,27 +194,30 @@ app.post('/api/shelters', async (req, res) => {
 // UPDATE shelter (Admin only)
 app.put('/api/shelters/:id', authenticate, async (req, res) => {
     try {
+        const { id } = req.params;
         const { type, floors, description } = req.body;
-        const updateData = { type, description };
         
-        // Handle floors update logic
-        if (type === 'underground_parking') {
-            updateData.floors = floors;
-        } else {
-            updateData.floors = undefined; // Unset floors if not parking
-        }
+        const shelters = await readData(DATA_FILE);
+        const index = shelters.findIndex(s => s.id === id);
 
-        const updatedShelter = await Shelter.findByIdAndUpdate(
-            req.params.id, 
-            updateData, 
-            { new: true } // Return the updated document
-        );
-
-        if (!updatedShelter) {
+        if (index === -1) {
             return res.status(404).json({ error: 'Shelter not found' });
         }
-        res.json(updatedShelter);
+
+        // Update fields
+        shelters[index].type = type;
+        shelters[index].description = description;
+        
+        if (type === 'underground_parking') {
+            shelters[index].floors = floors;
+        } else {
+            delete shelters[index].floors;
+        }
+
+        await writeData(DATA_FILE, shelters);
+        res.json(shelters[index]);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Failed to update shelter' });
     }
 });
@@ -245,12 +225,20 @@ app.put('/api/shelters/:id', authenticate, async (req, res) => {
 // DELETE shelter (Admin only)
 app.delete('/api/shelters/:id', authenticate, async (req, res) => {
     try {
-        const result = await Shelter.findByIdAndDelete(req.params.id);
-        if (!result) {
+        const { id } = req.params;
+        let shelters = await readData(DATA_FILE);
+        const initialLength = shelters.length;
+        
+        shelters = shelters.filter(s => s.id !== id);
+
+        if (shelters.length === initialLength) {
             return res.status(404).json({ error: 'Shelter not found' });
         }
+
+        await writeData(DATA_FILE, shelters);
         res.json({ success: true });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Failed to delete shelter' });
     }
 });
@@ -258,4 +246,5 @@ app.delete('/api/shelters/:id', authenticate, async (req, res) => {
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    console.log('Using local JSON storage for data persistence.');
 });

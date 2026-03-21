@@ -289,6 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
         statusMessage.textContent = msg;
     }
 
+    // Helper: Update shelter stats
+    function renderShelterStats() {
+        if (shelterCountSpan) {
+            shelterCountSpan.textContent = shelters.length;
+        }
+    }
+
     // Helper: Fetch shelters from server
     async function fetchShelters() {
         try {
