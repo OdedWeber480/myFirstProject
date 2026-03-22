@@ -94,16 +94,16 @@ function verifyPassword(password, salt, storedHash) {
 
 async function initializeAdmin() {
     try {
-        const adminExists = await Admin.findOne({ username: 'admin' });
-        if (!adminExists) {
-            console.log('Initializing default admin account...');
-            // The requested password
-            const password = process.env.ADMIN_INIT_PASSWORD;
-            if (!password) {
-                console.error("ADMIN_INIT_PASSWORD not set in environment variables. Cannot initialize admin.");
-                return;
-            }
+        const password = process.env.ADMIN_INIT_PASSWORD;
+        if (!password) {
+            console.warn("ADMIN_INIT_PASSWORD not set. Admin account management skipped.");
+            return;
+        }
 
+        let admin = await Admin.findOne({ username: 'admin' });
+        
+        if (!admin) {
+            console.log('Initializing default admin account...');
             const { salt, hash } = hashPassword(password);
             
             const newAdmin = new Admin({
@@ -115,7 +115,17 @@ async function initializeAdmin() {
             await newAdmin.save();
             console.log('Admin account created in database.');
         } else {
-            console.log('Admin account already exists.');
+            // Check if the current environment password matches the DB password
+            if (!verifyPassword(password, admin.salt, admin.hash)) {
+                console.log('ADMIN_INIT_PASSWORD changed. Updating database...');
+                const { salt, hash } = hashPassword(password);
+                admin.salt = salt;
+                admin.hash = hash;
+                await admin.save();
+                console.log('Admin password updated to match environment variable.');
+            } else {
+                console.log('Admin account already exists and matches environment password.');
+            }
         }
     } catch (error) {
         console.error('Failed to initialize admin:', error);
