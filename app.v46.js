@@ -757,8 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${shelter.description ? `<p style="margin: 5px 0 0 0; font-style: italic; font-size: 0.9rem;">${shelter.description}</p>` : ''}
                     </div>
                 </div>
-                <button class="nav-btn-small primary-btn" style="width: 100%; margin-top: 5px;" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${shelter.lat},${shelter.lng}&travelmode=walking', '_blank')">
-                    <span class="icon">🏃</span> ${t.navigate_btn}
+                <button class="nav-btn-small secondary-btn" style="width: 100%; margin-top: 5px; background-color: #4CAF50; padding: 8px;" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${shelter.lat},${shelter.lng}&travelmode=walking', '_blank')">
+                    <span class="icon" style="font-size: 1.2rem; display: inline; margin: 0;">🏃</span> ${t.navigate_btn}
                 </button>
             `;
             nearestSheltersList.appendChild(item);
