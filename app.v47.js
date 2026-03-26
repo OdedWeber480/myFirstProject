@@ -1,62 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CACHE BUSTING FOR MISSING OPTIONS ---
     // Check if the edit modal has the new option. If not, force reload.
-    // We need to wait a tick because the modal HTML is in the DOM but maybe the browser
-    // hasn't fully parsed/updated if it was serving a stale cached version of index.html.
     setTimeout(() => {
         if (!document.getElementById('edit-option-portable')) {
-            console.warn('Detected stale HTML (missing portable option in edit modal). Forcing reload...');
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                    }
-                    window.location.reload(true);
-                });
-            } else {
-                window.location.reload(true);
+            console.warn('Detected stale HTML (missing portable option). Reloading...');
+            if (window.location.search.indexOf('v=47') === -1) {
+                 window.location.replace(window.location.href.split('?')[0] + '?v=47');
             }
         }
-    }, 1000);
-    // ------------------------------------------
-
-    // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
-    setTimeout(() => {
-        console.log('Running App Version 45.0'); 
-        const editPortableOption = document.getElementById('edit-option-portable');
-        let lang = localStorage.getItem('appLang');
-        if (!lang) lang = 'he'; // Default to Hebrew if not set
-
-        if (editPortableOption && lang === 'he' && editPortableOption.textContent.trim() === 'Portable Shelter') {
-             console.warn('Detected stale translations in Admin Modal. Forcing reload...');
-             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                    }
-                    window.location.reload(true);
-                });
-            } else {
-                window.location.reload(true);
-            }
-        }
-    }, 2000);
-    // ------------------------------------------
+    }, 2000); // Increased timeout to let DOM settle
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=45')
+        navigator.serviceWorker.register('./sw.js?v=47')
             .then(reg => {
-                console.log('Service Worker Registered');
+                console.log('Service Worker Registered v47');
                 
                 // Check for updates
                 reg.onupdatefound = () => {
                     const newWorker = reg.installing;
                     newWorker.onstatechange = () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // New content available, force refresh
+                            // New content available
                             console.log('New content available, refreshing...');
-                            window.location.reload();
+                            // Only reload if we haven't just reloaded (simple check)
+                            if (!sessionStorage.getItem('sw_reloaded')) {
+                                sessionStorage.setItem('sw_reloaded', 'true');
+                                window.location.reload();
+                            }
                         }
                     };
                 };

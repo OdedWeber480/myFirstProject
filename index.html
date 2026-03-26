@@ -130,14 +130,17 @@
         if (window.location.search.indexOf('v=47') === -1) {
             // Check if we have the new map structure
             if (!document.getElementById('nearest-map')) {
-                console.warn("Detected stale HTML structure. Reloading...");
+                console.warn("Detected stale HTML structure. Reloading with version param...");
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
-                        window.location.reload(true);
+                        // Append v=47 to break the loop
+                        var newUrl = window.location.href.split('?')[0] + '?v=47';
+                        window.location.replace(newUrl);
                     });
                 } else {
-                    window.location.reload(true);
+                    var newUrl = window.location.href.split('?')[0] + '?v=47';
+                    window.location.replace(newUrl);
                 }
             }
         }
