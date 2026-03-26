@@ -120,33 +120,33 @@
                 <p><strong data-i18n="total_shelters">Total Shelters in Database:</strong> <strong><span id="shelter-count">0</span></strong></p>
             </div>
 
-            <div class="add-shelter-?v=54section" id="add-shelter-container" style="display: none;">
-                <a href="report.html" class="secondary-btn" style="background-color: #d32f2f; display: block; text-align: center; text-decoration: none;">
+            <div class="add-shelter-section" id="add-shelter-container" style="display: none;">
+                <a href="report.html?v=55" class="secondary-btn" style="background-color: #d32f2f; display: block; text-align: center; text-decoration: none;">
                     📍 <span data-i18n="nav_report_btn">Report a new Shelter</span>
                 </a>
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 54.0</p>
+                <p>Version 55.0</p>
             </footer>
         </main>
     </div>
-    <script src="app.v54.js"></script>
+    <script src="app.v55.js"></script>
     <script>
         // Force reload if we are somehow stuck on an old version logic
-        if (window.location.search.indexOf('v=54') === -1) {
+        if (window.location.search.indexOf('v=55') === -1) {
             // Check if we have the new map structure
             if (!document.getElementById('nearest-map')) {
                 console.warn("Detected stale HTML structure. Reloading with version param...");
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
-                        // Append v=54 to break the loop
-                        var newUrl = window.location.href.split('?')[0] + '?v=54';
+                        // Append v=55 to break the loop
+                        var newUrl = window.location.href.split('?')[0] + '?v=55';
                         window.location.replace(newUrl);
                     });
                 } else {
-                    var newUrl = window.location.href.split('?')[0] + '?v=54';
+                    var newUrl = window.location.href.split('?')[0] + '?v=55';
                     window.location.replace(newUrl);
                 }
             }
