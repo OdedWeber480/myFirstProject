@@ -52,12 +52,16 @@
 
             <!-- Nearest Shelter Modal -->
             <div id="nearest-shelter-modal" class="modal" style="display: none;">
-                <div class="modal-content">
+                <div class="modal-content" style="display: flex; flex-direction: column; max-height: 90vh;">
                     <span id="close-nearest-btn" class="close-modal">&times;</span>
                     <h3 data-i18n="nearest_shelter_title">Nearest Shelters</h3>
                     
-                    <div id="nearest-shelters-list" class="shelters-list-container">
+                    <div id="nearest-shelters-list" class="shelters-list-container" style="flex: 1; overflow-y: auto;">
                         <!-- Top 3 shelters will be injected here -->
+                    </div>
+
+                    <div id="nearest-map-container" style="height: 40%; min-height: 250px; width: 100%; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
+                         <div id="nearest-map" style="width: 100%; height: 100%; border-radius: 8px;"></div>
                     </div>
                 </div>
             </div>
@@ -120,26 +124,26 @@
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 47.0</p>
+                <p>Version 48.0</p>
             </footer>
         </main>
     </div>
-    <script src="app.v47.js"></script>
+    <script src="app.v48.js"></script>
     <script>
         // Force reload if we are somehow stuck on an old version logic
-        if (window.location.search.indexOf('v=47') === -1) {
+        if (window.location.search.indexOf('v=48') === -1) {
             // Check if we have the new map structure
             if (!document.getElementById('nearest-map')) {
                 console.warn("Detected stale HTML structure. Reloading with version param...");
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
-                        // Append v=47 to break the loop
-                        var newUrl = window.location.href.split('?')[0] + '?v=47';
+                        // Append v=48 to break the loop
+                        var newUrl = window.location.href.split('?')[0] + '?v=48';
                         window.location.replace(newUrl);
                     });
                 } else {
-                    var newUrl = window.location.href.split('?')[0] + '?v=47';
+                    var newUrl = window.location.href.split('?')[0] + '?v=48';
                     window.location.replace(newUrl);
                 }
             }
