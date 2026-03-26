@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.static(__dirname, {
     setHeaders: function (res, path, stat) {
         // Prevent caching of critical files to ensure updates are seen immediately
-        if (req.url.includes('sw.js') || req.url.includes('v49')) {
+        if (path.includes('sw.js') || path.includes('v49')) {
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.set('Pragma', 'no-cache');
             res.set('Expires', '0');
