@@ -56,12 +56,12 @@
                     <span id="close-nearest-btn" class="close-modal">&times;</span>
                     <h3 data-i18n="nearest_shelter_title">Nearest Shelters</h3>
                     
-                    <div id="nearest-shelters-list" class="shelters-list-container" style="flex: 1; overflow-y: auto;">
+                    <div id="nearest-shelters-list" class="shelters-list-container" style="flex: 1; overflow-y: auto; padding: 0 15px;">
                         <!-- Top 3 shelters will be injected here -->
                     </div>
 
-                    <div id="nearest-map-container" style="height: 40%; min-height: 250px; width: 100%; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
-                         <div id="nearest-map" style="width: 100%; height: 100%; border-radius: 8px;"></div>
+                    <div id="nearest-map-container" style="flex: 0 0 45%; height: 45%; width: 100%; position: relative; border-top: 1px solid #ddd;">
+                         <div id="nearest-map" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -124,26 +124,26 @@
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 50.0</p>
+                <p>Version 51.0</p>
             </footer>
         </main>
     </div>
-    <script src="app.v50.js"></script>
+    <script src="app.v51.js"></script>
     <script>
         // Force reload if we are somehow stuck on an old version logic
-        if (window.location.search.indexOf('v=50') === -1) {
+        if (window.location.search.indexOf('v=51') === -1) {
             // Check if we have the new map structure
             if (!document.getElementById('nearest-map')) {
                 console.warn("Detected stale HTML structure. Reloading with version param...");
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
-                        // Append v=50 to break the loop
-                        var newUrl = window.location.href.split('?')[0] + '?v=50';
+                        // Append v=51 to break the loop
+                        var newUrl = window.location.href.split('?')[0] + '?v=51';
                         window.location.replace(newUrl);
                     });
                 } else {
-                    var newUrl = window.location.href.split('?')[0] + '?v=50';
+                    var newUrl = window.location.href.split('?')[0] + '?v=51';
                     window.location.replace(newUrl);
                 }
             }

@@ -4,17 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (!document.getElementById('edit-option-portable')) {
             console.warn('Detected stale HTML (missing portable option). Reloading...');
-            if (window.location.search.indexOf('v=50') === -1) {
-                 window.location.replace(window.location.href.split('?')[0] + '?v=50');
+            if (window.location.search.indexOf('v=51') === -1) {
+                 window.location.replace(window.location.href.split('?')[0] + '?v=51');
             }
         }
     }, 2000); // Increased timeout to let DOM settle
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=50')
+        navigator.serviceWorker.register('./sw.js?v=51')
             .then(reg => {
-                console.log('Service Worker Registered v50');
+                console.log('Service Worker Registered v51');
                 
                 // Check for updates
                 reg.onupdatefound = () => {
@@ -700,6 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function initNearestMap(userLat, userLng, sheltersToShow) {
+        console.log("Initializing Nearest Map...", userLat, userLng);
         if (!nearestMap) {
             nearestMap = L.map('nearest-map').setView([userLat, userLng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -709,8 +710,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Always invalidate size to ensure proper rendering in modal
         setTimeout(() => {
+            console.log("Invalidating map size...");
             nearestMap.invalidateSize();
-        }, 100);
+        }, 300); // Slightly increased delay
 
         // Clear existing markers
         nearestMapMarkers.forEach(m => nearestMap.removeLayer(m));
