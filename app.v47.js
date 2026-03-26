@@ -110,6 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const nearestModal = document.getElementById('nearest-shelter-modal');
     const closeNearestBtn = document.getElementById('close-nearest-btn');
     const nearestSheltersList = document.getElementById('nearest-shelters-list'); // NEW LIST CONTAINER
+    let nearestMap = null; // Separate map instance for the nearest modal
+    let nearestMapMarkers = [];
     
     // Removed legacy single-result elements logic
     // const navigateBtn = document.getElementById('navigate-btn');
@@ -706,6 +708,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentNearestShelters.length > 0) {
                 renderNearestSheltersList(currentNearestShelters);
+                
+                // Initialize/Update Nearest Map
+                setTimeout(() => {
+                    initNearestMap(userLat, userLng, currentNearestShelters);
+                }, 200);
                 nearestModal.style.display = 'flex';
                 setStatus(`Found ${currentNearestShelters.length} nearby shelters.`);
             } else {
@@ -720,6 +727,52 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(errorMsg);
         }
     });
+
+    function initNearestMap(userLat, userLng, sheltersToShow) {
+        if (!nearestMap) {
+            nearestMap = L.map('nearest-map').setView([userLat, userLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(nearestMap);
+        } else {
+            nearestMap.invalidateSize();
+        }
+
+        // Clear existing markers
+        nearestMapMarkers.forEach(m => nearestMap.removeLayer(m));
+        nearestMapMarkers = [];
+
+        // Add User Marker
+        const userMarker = L.marker([userLat, userLng])
+            .addTo(nearestMap)
+            .bindPopup(`<b>${t.you_are_here}</b>`);
+        nearestMapMarkers.push(userMarker);
+
+        // Add Shelter Markers with Numbers 1, 2, 3
+        const group = new L.featureGroup([userMarker]);
+
+        sheltersToShow.forEach((shelter, index) => {
+            const num = index + 1;
+            
+            // Create Numbered Icon
+            const numberedIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color: #d32f2f; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${num}</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([shelter.lat, shelter.lng], { icon: numberedIcon })
+                .addTo(nearestMap)
+                .bindPopup(`<b>${num}. ${shelter.name}</b><br>${Math.round(shelter.distance * 1000)}m`);
+            
+            nearestMapMarkers.push(marker);
+            group.addLayer(marker);
+        });
+
+        // Fit bounds to show all markers
+        nearestMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+    }
 
     function renderNearestSheltersList(topShelters) {
         if (!nearestSheltersList) return;
