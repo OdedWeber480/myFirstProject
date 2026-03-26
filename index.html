@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Place Finder</title>
-    <link rel="stylesheet" href="main.css?v=44">
+    <link rel="stylesheet" href="main.css?v=45">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#d32f2f">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -54,20 +54,11 @@
             <div id="nearest-shelter-modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <span id="close-nearest-btn" class="close-modal">&times;</span>
-                    <h3 data-i18n="nearest_shelter_title">Nearest Shelter Found</h3>
+                    <h3 data-i18n="nearest_shelter_title">Nearest Shelters</h3>
                     
-                    <div class="shelter-details">
-                        <p><strong><span data-i18n="shelter_type_label">Shelter Type:</span></strong> <span id="nearest-type"></span></p>
-                        <p id="nearest-floors-container" style="display:none;"><strong><span data-i18n="floors_label">Floors Underground:</span></strong> <span id="nearest-floors"></span></p>
-                        <p><strong><span data-i18n="distance_label">Distance:</span></strong> <span id="nearest-distance"></span></p>
-                        <p><strong><span data-i18n="description_label">Description:</span></strong></p>
-                        <p id="nearest-description" style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin-top: 5px;"></p>
+                    <div id="nearest-shelters-list" class="shelters-list-container">
+                        <!-- Top 3 shelters will be injected here -->
                     </div>
-
-                    <button id="navigate-btn" class="primary-btn" style="width: 100%;">
-                        <span class="icon">🏃</span>
-                        <span data-i18n="navigate_btn">Navigate Now</span>
-                    </button>
                 </div>
             </div>
 
@@ -136,3 +127,4 @@
     <script src="app.v44.js"></script>
 </body>
 </html>
+55

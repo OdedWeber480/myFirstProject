@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.static(__dirname, {
     setHeaders: function (res, path, stat) {
         // Prevent caching of critical files to ensure updates are seen immediately
-        if (path.endsWith('sw.js') || path.endsWith('index.html') || path.endsWith('app.v44.js') || path.endsWith('main.css') || path.endsWith('report.v44.js')) {
+        if (path.endsWith('sw.js') || path.endsWith('index.html') || path.endsWith('app.v45.js') || path.endsWith('main.css') || path.endsWith('report.v45.js')) {
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.set('Pragma', 'no-cache');
             res.set('Expires', '0');

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CACHE BUSTING FOR STALE TRANSLATIONS ---
     setTimeout(() => {
-        console.log('Running App Version 44.0'); 
+        console.log('Running App Version 45.0'); 
         const editPortableOption = document.getElementById('edit-option-portable');
         let lang = localStorage.getItem('appLang');
         if (!lang) lang = 'he'; // Default to Hebrew if not set
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=44')
+        navigator.serviceWorker.register('./sw.js?v=45')
             .then(reg => {
                 console.log('Service Worker Registered');
                 
@@ -109,13 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Nearest Shelter Modal Elements
     const nearestModal = document.getElementById('nearest-shelter-modal');
     const closeNearestBtn = document.getElementById('close-nearest-btn');
-    const navigateBtn = document.getElementById('navigate-btn');
-    const nearestType = document.getElementById('nearest-type');
-    const nearestFloorsContainer = document.getElementById('nearest-floors-container');
-    const nearestFloors = document.getElementById('nearest-floors');
-    const nearestDistance = document.getElementById('nearest-distance');
-    const nearestDescription = document.getElementById('nearest-description');
-    let currentNearestShelter = null;
+    const nearestSheltersList = document.getElementById('nearest-shelters-list'); // NEW LIST CONTAINER
+    
+    // Removed legacy single-result elements logic
+    // const navigateBtn = document.getElementById('navigate-btn');
+    // const nearestType = document.getElementById('nearest-type');
+    // ...
+    
+    let currentNearestShelters = []; // Changed to array
 
     // API URL & State
     const API_URL = '/api/shelters';
@@ -648,11 +649,11 @@ document.addEventListener('DOMContentLoaded', () => {
     closeNearestBtn.addEventListener('click', () => {
         nearestModal.style.display = 'none';
     });
-
-    navigateBtn.addEventListener('click', () => {
-        if (currentNearestShelter) {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentNearestShelter.lat},${currentNearestShelter.lng}&travelmode=walking`, '_blank');
-        }
+// 
+    //navigateBtn.addEventListener('click', () => {
+    //    if (currentNearestShelter) {
+    //        window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentNearestShelter.lat},${currentNearestShelter.lng}&travelmode=walking`, '_blank');
+    //     }
     });
 
     // Helper: Get current location
@@ -687,7 +688,8 @@ document.addEventListener('DOMContentLoaded', () => {
             await fetchShelters();
 
             if (shelters.length === 0) {
-                setStatus(t.status_no_shelters);
+                alest(t.status_no_shelters);
+                retStatus(t.status_no_shelters);
                 return;
             }
 
@@ -702,57 +704,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Sort by distance (ascending)
             sheltersWithDistance.sort((a, b) => a.distance - b.distance);
-
-            // Debug: Log top 3
+Gt
+            /urre tNuar 3= 
             console.log("Closest Shelters:", sheltersWithDistance.slice(0, 3));
+if (urreNs.length>0) {
+                renderNearetSLs(currentNearestSelters);
+                nearestModal.style.dplay = 'flex';
+                seSttus(`Foud ${urrntNearestShelters.length} nearby shelters.`)
+            } else {            const nearestShelter = sheltersWithDistance[0];
+   stSttus(t.status_calc_eror);
+                alrt(t.atus_no_ss;
+           }
 
-            const nearestShelter = sheltersWithDistance[0];
-
-            if (nearestShelter) {
-                currentNearestShelter = nearestShelter;
-                const minDistance = nearestShelter.distance;
-
-                // Translate type
-                let typeKey = '';
-                if (nearestShelter.type === 'public_shelter') typeKey = 'type_public';
-                else if (nearestShelter.type === 'building_shelter') typeKey = 'type_building';
-                else if (nearestShelter.type === 'portable_shelter') typeKey = 'type_portable';
-                else if (nearestShelter.type === 'underground_parking') typeKey = 'type_parking';
-                
-                let typeDisplay = t[typeKey] || nearestShelter.type;
-
-                if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
-                     nearestFloorsContainer.style.display = 'block';
-                     nearestFloors.textContent = nearestShelter.floors;
-                } else {
-                     nearestFloorsContainer.style.display = 'none';
-                }
-
-                nearestDistance.textContent = `${Math.round(minDistance * 1000)}m`;
-                
-                if (nearestShelter.description) {
-                    nearestDescription.style.display = 'block';
-                    nearestDescription.textContent = nearestShelter.description;
-                } else {
-                     nearestDescription.style.display = 'none';
-                }
-
-                if (nearestShelter.type === 'underground_parking' && nearestShelter.floors) {
-                    typeDisplay += ` (${nearestShelter.floors} ${t.floors_down})`;
-                }
-                setStatus(`Nearest: ${typeDisplay} - ${Math.round(minDistance * 1000)}m`);
-                
-                // Show Modal instead of opening map directly
-                nearestModal.style.display = 'flex';
-            } else {
-                setStatus(t.status_calc_error);
-            }
-
-        } catch (error) {
-            console.error(error);
-            setStatus(t.status_error_loc + error.message);
+        } catch (error) 
+            console.error("GuideiError:",ferror);
+ (          nonst errorMsg = error.code === 1 ? "Location access denied. Please enable GPS." : (t.states_earor_loc + error.message);
+            setStatus(errorMsg);
+            alert(errorMsg);
         }
     });
+
+    fusction renderShelter) {sList(topShelters){
+       if (!sList) return
+        nearestSheltersList.innerHTML = '';
+        
+        topShelters.forEach((shelter, index) => {
+            currendNestSheMeterslteM=th. ound(eestShelter; * 1000)
+
+        
+            // Translate type
+            let e= '';
+            if (nearelr.type === 'public_shelter') typeKey = 'type_public';
+            else if (shelter.type === 'building_shelter') typeKey = 'type_building';
+            else if (shelter.type === 'portable_shelter') typeKey = 'type_portable';
+            else if (nearestShelter.type === 'underground_parking') typeKey = 'type_parking';
+            
+
+                typeDisplayi+=f` (${thelSer.felter} ${p fdooro_dgwn})`& nearestShelter.floors) {
+            }
+
+            const ionmyledocumdnt.cspaa=E bment('div')
+            it m.c a sNamne= 'nearest-shelter-item';restFloors.textContent = nearestShelter.floors;
+            // Add some ielin  ye fr he tm if cs isn' updat yet (t houdbefi though)
+            item.style.borderBottom = "1px solid #eee";    nearestFloorsContainer.style.display = 'none';
+msylpadg="5px "
+
+            item.innerHTML = `nearestDistance.textContent = `${Math.round(minDistance * 1000)}m`;
+                <dvy="magn-botm:10px;">
+                 if <h4(stylh="matgen: 0 0 5rx 0; fest-rizi: 1o1rem">
+                        <span style="background: #d32f2f; color: whist; b.rder-radius: 50%; widih: 24px; hsighl: 24px;adisplay: inli=e-fl x; 'lign-itlmo: c;n; jufy-cntent: ceter font-size: 0.9rem; margin-right: 8px;">${index + 1 </npan>estDescription.textContent = nearestShelter.description;
+                   } els${shl.m}
+                    </h4>                }
+    <dvl"fot-siz: 0.95em; col:#555;mgin-t:32px;">
+                     if <p(snelr="margsn: 2Sxy0;"><strong>e t.uergrou_type_labe_}</strang>ng' ypeDisp aye</p>r.floors) {
+                        <p }yl="mgin: 2px 0;"><rong>.dtance_bel</sg> ${eMetrs</p>
+                        ${shelter.description ? `<p style="margin: 5px 0 00;fnt-stye:lic;t-sze:0.9re;">${shelter.sripion}</p>` : ''}
+                    </adv>
+pn             a</div>estModal.style.display = 'flex';
+               }<button class="nav-btn-smalleprimary-btn"lstyle="widh: 100%; mrgin-op: 5px;" onclick="window.open'htps://www.googlecom/maps/dir/?api=1&deinion=${helter.lt},${shet.lng}&tavelmde=walking', '_blank'">
+            <spanlss="in">🏃</span>$t.navigate_btn}
+            } ca</buttch>
+            `
+            nearecnsheleersLieroepp)ndChid(it
+         );   setStatus(t.status_error_loc + error.message);
+      }
+    });
+ RemovednigatBtn litersi is nwper-iminl orunecessary
 
     // Haversine formula to calculate distance in km
 
