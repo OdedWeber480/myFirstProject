@@ -120,11 +120,27 @@
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 44.0</p>
+                <p>Version 45.0</p>
             </footer>
         </main>
     </div>
-    <script src="app.v44.js"></script>
+    <script src="app.v45.js"></script>
+    <script>
+        // Force reload if we are somehow stuck on an old version logic
+        if (window.location.search.indexOf('v=45') === -1) {
+            // Check if we have the new modal structure
+            if (!document.getElementById('nearest-shelters-list')) {
+                console.warn("Detected stale HTML structure. Reloading...");
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for(let registration of registrations) { registration.unregister(); }
+                        window.location.reload(true);
+                    });
+                } else {
+                    window.location.reload(true);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
-55

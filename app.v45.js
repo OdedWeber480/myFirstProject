@@ -649,12 +649,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeNearestBtn.addEventListener('click', () => {
         nearestModal.style.display = 'none';
     });
-// 
-    //navigateBtn.addEventListener('click', () => {
-    //    if (currentNearestShelter) {
-    //        window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentNearestShelter.lat},${currentNearestShelter.lng}&travelmode=walking`, '_blank');
-    //     }
-    });
 
     // Helper: Get current location
     function getCurrentLocation() {
@@ -704,72 +698,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Sort by distance (ascending)
             sheltersWithDistance.sort((a, b) => a.distance - b.distance);
-Gt
-            /urre tNuar 3= 
-            console.log("Closest Shelters:", sheltersWithDistance.slice(0, 3));
-if (urreNs.length>0) {
-                renderNearetSLs(currentNearestSelters);
-                nearestModal.style.dplay = 'flex';
-                seSttus(`Foud ${urrntNearestShelters.length} nearby shelters.`)
-            } else {            const nearestShelter = sheltersWithDistance[0];
-   stSttus(t.status_calc_eror);
-                alrt(t.atus_no_ss;
-           }
 
-        } catch (error) 
-            console.error("GuideiError:",ferror);
- (          nonst errorMsg = error.code === 1 ? "Location access denied. Please enable GPS." : (t.states_earor_loc + error.message);
+            // Get top 3
+            currentNearestShelters = sheltersWithDistance.slice(0, 3);
+            
+            console.log("Closest Shelters:", currentNearestShelters);
+
+            if (currentNearestShelters.length > 0) {
+                renderNearestSheltersList(currentNearestShelters);
+                nearestModal.style.display = 'flex';
+                setStatus(`Found ${currentNearestShelters.length} nearby shelters.`);
+            } else {
+                setStatus(t.status_calc_error);
+                alert(t.status_no_shelters);
+            }
+
+        } catch (error) {
+            console.error("Guide Error:", error);
+            const errorMsg = error.code === 1 ? "Location access denied. Please enable GPS." : (t.status_error_loc + error.message);
             setStatus(errorMsg);
             alert(errorMsg);
         }
     });
 
-    fusction renderShelter) {sList(topShelters){
-       if (!sList) return
+    function renderNearestSheltersList(topShelters) {
+        if (!nearestSheltersList) return;
         nearestSheltersList.innerHTML = '';
         
         topShelters.forEach((shelter, index) => {
-            currendNestSheMeterslteM=th. ound(eestShelter; * 1000)
-
-        
+            const distanceMeters = Math.round(shelter.distance * 1000);
+            
             // Translate type
-            let e= '';
-            if (nearelr.type === 'public_shelter') typeKey = 'type_public';
+            let typeKey = '';
+            if (shelter.type === 'public_shelter') typeKey = 'type_public';
             else if (shelter.type === 'building_shelter') typeKey = 'type_building';
             else if (shelter.type === 'portable_shelter') typeKey = 'type_portable';
-            else if (nearestShelter.type === 'underground_parking') typeKey = 'type_parking';
+            else if (shelter.type === 'underground_parking') typeKey = 'type_parking';
             
-
-                typeDisplayi+=f` (${thelSer.felter} ${p fdooro_dgwn})`& nearestShelter.floors) {
+            let typeDisplay = t[typeKey] || shelter.type;
+            if (shelter.type === 'underground_parking' && shelter.floors) {
+                typeDisplay += ` (${shelter.floors} ${t.floors_down})`;
             }
 
-            const ionmyledocumdnt.cspaa=E bment('div')
-            it m.c a sNamne= 'nearest-shelter-item';restFloors.textContent = nearestShelter.floors;
-            // Add some ielin  ye fr he tm if cs isn' updat yet (t houdbefi though)
-            item.style.borderBottom = "1px solid #eee";    nearestFloorsContainer.style.display = 'none';
-msylpadg="5px "
+            const item = document.createElement('div');
+            item.className = 'nearest-shelter-item';
+            item.style.borderBottom = "1px solid #eee";
+            item.style.padding = "15px 0";
 
-            item.innerHTML = `nearestDistance.textContent = `${Math.round(minDistance * 1000)}m`;
-                <dvy="magn-botm:10px;">
-                 if <h4(stylh="matgen: 0 0 5rx 0; fest-rizi: 1o1rem">
-                        <span style="background: #d32f2f; color: whist; b.rder-radius: 50%; widih: 24px; hsighl: 24px;adisplay: inli=e-fl x; 'lign-itlmo: c;n; jufy-cntent: ceter font-size: 0.9rem; margin-right: 8px;">${index + 1 </npan>estDescription.textContent = nearestShelter.description;
-                   } els${shl.m}
-                    </h4>                }
-    <dvl"fot-siz: 0.95em; col:#555;mgin-t:32px;">
-                     if <p(snelr="margsn: 2Sxy0;"><strong>e t.uergrou_type_labe_}</strang>ng' ypeDisp aye</p>r.floors) {
-                        <p }yl="mgin: 2px 0;"><rong>.dtance_bel</sg> ${eMetrs</p>
-                        ${shelter.description ? `<p style="margin: 5px 0 00;fnt-stye:lic;t-sze:0.9re;">${shelter.sripion}</p>` : ''}
-                    </adv>
-pn             a</div>estModal.style.display = 'flex';
-               }<button class="nav-btn-smalleprimary-btn"lstyle="widh: 100%; mrgin-op: 5px;" onclick="window.open'htps://www.googlecom/maps/dir/?api=1&deinion=${helter.lt},${shet.lng}&tavelmde=walking', '_blank'">
-            <spanlss="in">🏃</span>$t.navigate_btn}
-            } ca</buttch>
-            `
-            nearecnsheleersLieroepp)ndChid(it
-         );   setStatus(t.status_error_loc + error.message);
-      }
-    });
- RemovednigatBtn litersi is nwper-iminl orunecessary
+            item.innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <h4 style="margin: 0 0 5px 0; font-size: 1.1rem;">
+                        <span style="background: #d32f2f; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; margin-right: 8px;">${index + 1}</span>
+                        ${shelter.name}
+                    </h4>
+                    <div style="font-size: 0.95rem; color: #555; margin-left: 32px;">
+                        <p style="margin: 2px 0;"><strong>${t.shelter_type_label}</strong> ${typeDisplay}</p>
+                        <p style="margin: 2px 0;"><strong>${t.distance_label}</strong> ${distanceMeters}m</p>
+                        ${shelter.description ? `<p style="margin: 5px 0 0 0; font-style: italic; font-size: 0.9rem;">${shelter.description}</p>` : ''}
+                    </div>
+                </div>
+                <button class="nav-btn-small primary-btn" style="width: 100%; margin-top: 5px;" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${shelter.lat},${shelter.lng}&travelmode=walking', '_blank')">
+                    <span class="icon">🏃</span> ${t.navigate_btn}
+                </button>
+            `;
+            nearestSheltersList.appendChild(item);
+        });
+    }
 
     // Haversine formula to calculate distance in km
 
