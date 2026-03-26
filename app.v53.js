@@ -4,17 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (!document.getElementById('edit-option-portable')) {
             console.warn('Detected stale HTML (missing portable option). Reloading...');
-            if (window.location.search.indexOf('v=51') === -1) {
-                 window.location.replace(window.location.href.split('?')[0] + '?v=51');
+            if (window.location.search.indexOf('v=53') === -1) {
+                 window.location.replace(window.location.href.split('?')[0] + '?v=53');
             }
         }
     }, 2000); // Increased timeout to let DOM settle
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=51')
+        navigator.serviceWorker.register('./sw.js?v=53')
             .then(reg => {
-                console.log('Service Worker Registered v51');
+                console.log('Service Worker Registered v53');
                 
                 // Check for updates
                 reg.onupdatefound = () => {
