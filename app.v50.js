@@ -4,17 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (!document.getElementById('edit-option-portable')) {
             console.warn('Detected stale HTML (missing portable option). Reloading...');
-            if (window.location.search.indexOf('v=49') === -1) {
-                 window.location.replace(window.location.href.split('?')[0] + '?v=49');
+            if (window.location.search.indexOf('v=50') === -1) {
+                 window.location.replace(window.location.href.split('?')[0] + '?v=50');
             }
         }
     }, 2000); // Increased timeout to let DOM settle
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=49')
+        navigator.serviceWorker.register('./sw.js?v=50')
             .then(reg => {
-                console.log('Service Worker Registered v49');
+                console.log('Service Worker Registered v50');
                 
                 // Check for updates
                 reg.onupdatefound = () => {
@@ -705,9 +705,12 @@ document.addEventListener('DOMContentLoaded', () => {
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(nearestMap);
-        } else {
-            nearestMap.invalidateSize();
         }
+        
+        // Always invalidate size to ensure proper rendering in modal
+        setTimeout(() => {
+            nearestMap.invalidateSize();
+        }, 100);
 
         // Clear existing markers
         nearestMapMarkers.forEach(m => nearestMap.removeLayer(m));

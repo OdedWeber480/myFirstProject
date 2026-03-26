@@ -124,26 +124,26 @@
             </div>
             
             <footer style="margin-top: 30px; color: #999; font-size: 0.8rem;">
-                <p>Version 49.0</p>
+                <p>Version 50.0</p>
             </footer>
         </main>
     </div>
-    <script src="app.v49.js"></script>
+    <script src="app.v50.js"></script>
     <script>
         // Force reload if we are somehow stuck on an old version logic
-        if (window.location.search.indexOf('v=49') === -1) {
+        if (window.location.search.indexOf('v=50') === -1) {
             // Check if we have the new map structure
             if (!document.getElementById('nearest-map')) {
                 console.warn("Detected stale HTML structure. Reloading with version param...");
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
-                        // Append v=49 to break the loop
-                        var newUrl = window.location.href.split('?')[0] + '?v=49';
+                        // Append v=50 to break the loop
+                        var newUrl = window.location.href.split('?')[0] + '?v=50';
                         window.location.replace(newUrl);
                     });
                 } else {
-                    var newUrl = window.location.href.split('?')[0] + '?v=49';
+                    var newUrl = window.location.href.split('?')[0] + '?v=50';
                     window.location.replace(newUrl);
                 }
             }
