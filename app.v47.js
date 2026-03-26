@@ -684,8 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
             await fetchShelters();
 
             if (shelters.length === 0) {
-                alest(t.status_no_shelters);
-                retStatus(t.status_no_shelters);
+                alert(t.status_no_shelters);
+                setStatus(t.status_no_shelters);
                 return;
             }
 
