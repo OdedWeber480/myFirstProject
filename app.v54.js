@@ -4,17 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (!document.getElementById('edit-option-portable')) {
             console.warn('Detected stale HTML (missing portable option). Reloading...');
-            if (window.location.search.indexOf('v=53') === -1) {
-                 window.location.replace(window.location.href.split('?')[0] + '?v=53');
+            if (window.location.search.indexOf('v=54') === -1) {
+                 window.location.replace(window.location.href.split('?')[0] + '?v=54');
             }
         }
     }, 2000); // Increased timeout to let DOM settle
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=53')
+        navigator.serviceWorker.register('./sw.js?v=54')
             .then(reg => {
-                console.log('Service Worker Registered v53');
+                console.log('Service Worker Registered v54');
                 
                 // Check for updates
                 reg.onupdatefound = () => {
@@ -702,7 +702,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function initNearestMap(userLat, userLng, sheltersToShow) {
         console.log("Initializing Nearest Map...", userLat, userLng);
         const mapContainer = document.getElementById('nearest-map');
-        if (mapContainer) mapContainer.style.height = '100%'; // Ensure height is set
+        
+        if (mapContainer) {
+            // Force styles
+            mapContainer.style.display = 'block';
+            mapContainer.style.height = '100%';
+            console.log("Map Container Dimensions:", mapContainer.offsetWidth, mapContainer.offsetHeight);
+        }
 
         if (!nearestMap) {
             nearestMap = L.map('nearest-map').setView([userLat, userLng], 14);
@@ -716,11 +722,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Force redraw sequence
         setTimeout(() => {
-            console.log("Invalidating map size (force)...");
+            console.log("Invalidating map size (force 1)...");
             nearestMap.invalidateSize();
         }, 100);
         
         setTimeout(() => {
+             console.log("Invalidating map size (force 2)...");
              nearestMap.invalidateSize();
         }, 500);
 
