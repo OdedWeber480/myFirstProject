@@ -701,18 +701,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initNearestMap(userLat, userLng, sheltersToShow) {
         console.log("Initializing Nearest Map...", userLat, userLng);
+        const mapContainer = document.getElementById('nearest-map');
+        if (mapContainer) mapContainer.style.height = '100%'; // Ensure height is set
+
         if (!nearestMap) {
             nearestMap = L.map('nearest-map').setView([userLat, userLng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(nearestMap);
+        } else {
+            // If map exists, just ensure it's resized correctly
+            nearestMap.invalidateSize();
         }
         
-        // Always invalidate size to ensure proper rendering in modal
+        // Force redraw sequence
         setTimeout(() => {
-            console.log("Invalidating map size...");
+            console.log("Invalidating map size (force)...");
             nearestMap.invalidateSize();
-        }, 300); // Slightly increased delay
+        }, 100);
+        
+        setTimeout(() => {
+             nearestMap.invalidateSize();
+        }, 500);
 
         // Clear existing markers
         nearestMapMarkers.forEach(m => nearestMap.removeLayer(m));
